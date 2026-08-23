@@ -17,7 +17,17 @@ docker compose pull
 docker compose up -d
 ```
 
-The application container runs database migrations before serving traffic. Horizon, the scheduler, and Reverb run as separate services and must remain active.
+Database migrations run once through the guarded deployment flow. Horizon, the scheduler,
+and Reverb run as separate services and must remain active.
+
+For versioned production deployments, use the guarded deploy script instead:
+
+```bash
+./scripts/deploy.sh 1.2.3
+```
+
+It prevents concurrent deploys, creates a verified backup, runs migrations once,
+waits for readiness and restores the previous image when the new release is unhealthy.
 
 ## Verify
 
