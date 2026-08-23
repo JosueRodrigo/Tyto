@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/dialog';
 import type { SharedData } from '@/types';
 
-const UPDATE_COMMAND = 'php artisan laraowl:update';
+const UPDATE_COMMAND = 'php artisan tyto:update';
 
 /** Holds the version the operator last dismissed, so a newer one shows again. */
-const DISMISSED_KEY = 'laraowl:update-dismissed';
+const DISMISSED_KEY = 'tyto:update-dismissed';
 
 export function UpdateBanner() {
     const { update, version } = usePage<SharedData>().props;
@@ -58,7 +58,7 @@ export function UpdateBanner() {
                 <ArrowUpCircle className="size-4 shrink-0 text-primary" />
 
                 <p className="font-medium">
-                    LaraOwl v{update.version} is available
+                    Tyto v{update.version} is available
                 </p>
 
                 <p className="text-muted-foreground">
@@ -122,7 +122,7 @@ export function UpdateBanner() {
                     </div>
 
                     <p className="text-sm text-muted-foreground">
-                        LaraOwl goes into maintenance mode, pulls the release,
+                        Tyto goes into maintenance mode, pulls the release,
                         installs dependencies, rebuilds assets, and migrates.
                         Add <code>--dry-run</code> to preview the steps without
                         running them.

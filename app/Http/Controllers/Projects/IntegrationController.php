@@ -77,7 +77,7 @@ class IntegrationController extends Controller
             app(IntegrationService::class)->send(
                 $integration,
                 '✅ Test Connection',
-                'This is a test notification from Laraowl to verify your integration settings.'
+                'This is a test notification from Tyto to verify your integration settings.'
             );
 
             return back()->with('success', 'Test notification sent successfully.');

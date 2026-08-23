@@ -32,7 +32,7 @@ export default function CreateTeam() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-black tracking-tighter text-foreground uppercase">
-                            Laraowl
+                            Tyto
                         </h1>
                         <p className="text-xs font-bold tracking-widest text-muted-foreground uppercase opacity-60">
                             Workspace Setup
@@ -101,7 +101,7 @@ export default function CreateTeam() {
                 </Card>
 
                 <p className="text-center text-[10px] font-bold tracking-[0.2em] text-muted-foreground/40 uppercase">
-                    Laraowl Monitoring System &copy; 2026
+                    Tyto Monitoring System &copy; 2026
                 </p>
             </div>
         </div>

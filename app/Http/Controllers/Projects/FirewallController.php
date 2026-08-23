@@ -270,7 +270,7 @@ class FirewallController extends Controller
             $project,
             $request->ip,
             $action,
-            $request->note ?? "Laraowl $action"
+            $request->note ?? "Tyto $action"
         );
 
         if (! $cfRule) {
@@ -307,7 +307,7 @@ class FirewallController extends Controller
             $settings['firewall_rules'] = array_values($rules);
             $project->update(['settings' => $settings]);
 
-            return back()->with('success', 'IP rule removed from Laraowl and Cloudflare.');
+            return back()->with('success', 'IP rule removed from Tyto and Cloudflare.');
         }
 
         return back()->withErrors(['error' => 'Rule not found.']);

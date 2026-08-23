@@ -52,7 +52,7 @@ function instanceOperator(): User
 }
 
 beforeEach(function () {
-    config(['laraowl.update_check.enabled' => true]);
+    config(['tyto.update_check.enabled' => true]);
 });
 
 test('the current version is a hardcoded, well-formed semver constant', function () {
@@ -129,7 +129,7 @@ test('a pending update is reported only when the cached release is newer', funct
 });
 
 test('checking for updates can be disabled entirely', function () {
-    config(['laraowl.update_check.enabled' => false]);
+    config(['tyto.update_check.enabled' => false]);
     Http::fake();
 
     cacheRelease(new Release('99.0.0', 'LaraOwl 99', 'https://example.com'));
@@ -318,7 +318,7 @@ test('the update command fails when github cannot be reached', function () {
 });
 
 test('the update command refuses to run when update checks are disabled', function () {
-    config(['laraowl.update_check.enabled' => false]);
+    config(['tyto.update_check.enabled' => false]);
     Http::fake();
 
     $this->artisan('laraowl:update')

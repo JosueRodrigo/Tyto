@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'tyto.token' => VerifyLaraowlToken::class,
             'laraowl.token' => VerifyLaraowlToken::class,
         ]);
 

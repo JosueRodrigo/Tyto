@@ -11,4 +11,12 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('projects:check-health')->everyThirtySeconds();
 Schedule::command('model:prune')->daily();
-Schedule::command('laraowl:update --check')->daily();
+Schedule::command('tyto:update --check')->daily();
+
+Artisan::command('tyto:update {--check} {--dry-run} {--force}', function (): int {
+    return $this->call('laraowl:update', [
+        '--check' => (bool) $this->option('check'),
+        '--dry-run' => (bool) $this->option('dry-run'),
+        '--force' => (bool) $this->option('force'),
+    ]);
+})->purpose('Check for and install the latest Tyto release');

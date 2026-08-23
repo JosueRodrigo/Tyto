@@ -1,5 +1,5 @@
 <x-mail::message>
-# 🦉 Laraowl Alert
+# Tyto Alert
 
 {{ $messageContent }}
 

@@ -39,7 +39,7 @@ class AlertNotification extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🦉 Laraowl Alert: System Notification',
+            subject: 'Tyto Alert: System Notification',
         );
     }
 

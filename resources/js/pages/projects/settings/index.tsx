@@ -1915,7 +1915,7 @@ export default function ProjectSettings({
                                 </CardTitle>
                                 <CardDescription>
                                     Use these credentials to connect your
-                                    application to Laraowl.
+                                    application to Tyto.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -2183,7 +2183,7 @@ export default function ProjectSettings({
                                                 </span>
                                             </div>
                                             <p className="text-[10px] leading-relaxed text-muted-foreground">
-                                                Laraowl requires{' '}
+                                                Tyto requires{' '}
                                                 <strong>Global</strong> or{' '}
                                                 <strong>Specific Zone</strong>{' '}
                                                 access. If the connection fails,
