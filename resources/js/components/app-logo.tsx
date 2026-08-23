@@ -6,16 +6,16 @@ export default function AppLogo() {
     const { name } = usePage<SharedData>().props;
 
     return (
-        <div className="group flex cursor-pointer items-center gap-2.5">
-            <div className="flex aspect-square size-9 items-center justify-center overflow-hidden rounded-xl bg-neutral-900 p-1 shadow-lg ring-1 ring-white/10 transition-all">
-                <AppLogoIcon className="size-full object-contain" />
+        <div className="group flex cursor-pointer items-center gap-3">
+            <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-emerald-300 text-slate-950 shadow-[0_0_24px_rgba(110,231,183,0.18)] ring-1 ring-emerald-200/30 transition-transform group-hover:scale-[1.03]">
+                <AppLogoIcon className="size-7" />
             </div>
             <div className="flex flex-col leading-tight">
-                <span className="text-base font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+                <span className="text-base font-black tracking-[-0.03em] text-sidebar-foreground">
                     {name}
                 </span>
-                <span className="text-[9px] font-semibold tracking-widest text-neutral-500 uppercase">
-                    Monitoring
+                <span className="text-[9px] font-bold tracking-[0.18em] text-sidebar-foreground/40 uppercase">
+                    Observe · Resolve
                 </span>
             </div>
         </div>
