@@ -1,4 +1,4 @@
-import { Head, useForm, usePage, router } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import {
     User as UserIcon,
@@ -15,7 +15,10 @@ import {
     FileCode,
     Cpu,
     Database,
+    ArrowLeft,
+    LoaderCircle,
 } from 'lucide-react';
+import { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Badge } from '@/components/ui/badge';
@@ -48,13 +51,18 @@ export default function IssueShow({
     const { data, setData, post, processing, reset } = useForm({
         comment: '',
     });
+    const [updating, setUpdating] = useState(false);
 
     const updateIssue = (key: string, value: any) => {
         const finalValue = value === 'unassigned' ? null : value;
         router.patch(
             `/${teamSlug}/${projectSlug}/issues/${issue.id}`,
             { [key]: finalValue },
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                onStart: () => setUpdating(true),
+                onFinish: () => setUpdating(false),
+            },
         );
     };
 
@@ -91,24 +99,31 @@ export default function IssueShow({
     const stackTrace = Array.isArray(payload.stack) ? payload.stack : [];
 
     return (
-        <div className="mx-auto max-w-[1600px] animate-in space-y-6 duration-700 fade-in slide-in-from-bottom-4">
+        <div className="animate-in space-y-6 duration-500 fade-in">
             <Head title={`Issue #${issue.id} - ${issue.title}`} />
 
             {/* Top Header Section */}
-            <div className="flex flex-col justify-between gap-4 border-b border-border/50 pb-6 md:flex-row md:items-center">
+            <div className="tyto-panel flex flex-col justify-between gap-5 p-6 lg:flex-row lg:items-start">
                 <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                        <span className="rounded border border-primary/10 bg-primary/5 px-1.5 py-0.5 text-primary">
+                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
+                        <Link
+                            href={`/${teamSlug}/${projectSlug}/issues`}
+                            className="mr-1 inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                        >
+                            <ArrowLeft className="size-3" /> Incidents
+                        </Link>
+                        <ChevronRight className="size-3" />
+                        <span className="rounded border border-primary/15 bg-primary/5 px-1.5 py-0.5 text-primary">
                             Issue #{issue.id}
                         </span>
                         <ChevronRight className="size-3" />
                         <span>{issue.type}</span>
                     </div>
-                    <h1 className="text-2xl leading-tight font-black tracking-tight break-all whitespace-normal text-foreground uppercase">
+                    <h1 className="text-2xl leading-tight font-black tracking-[-0.03em] break-words text-foreground lg:text-3xl">
                         {issue.title}
                     </h1>
-                    <div className="flex items-center gap-3">
-                        <p className="text-sm font-medium break-all whitespace-normal text-muted-foreground">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <p className="text-sm font-medium break-words text-muted-foreground">
                             {issue.message}
                         </p>
                         {payload.file && (
@@ -120,7 +135,7 @@ export default function IssueShow({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <Badge
                         variant="outline"
                         className="h-8 rounded-lg border-primary/20 bg-primary/5 px-3 text-[10px] font-bold tracking-widest text-primary uppercase"
@@ -133,6 +148,30 @@ export default function IssueShow({
                     >
                         {issue.priority} Priority
                     </Badge>
+                    <Button
+                        size="sm"
+                        variant={
+                            issue.status === 'resolved' ? 'outline' : 'default'
+                        }
+                        disabled={updating}
+                        onClick={() =>
+                            updateIssue(
+                                'status',
+                                issue.status === 'resolved'
+                                    ? 'open'
+                                    : 'resolved',
+                            )
+                        }
+                    >
+                        {updating ? (
+                            <LoaderCircle className="size-4 animate-spin" />
+                        ) : (
+                            <CheckCircle2 className="size-4" />
+                        )}
+                        {issue.status === 'resolved'
+                            ? 'Reopen'
+                            : 'Resolve incident'}
+                    </Button>
                 </div>
             </div>
 
@@ -248,8 +287,20 @@ export default function IssueShow({
 
                     {/* JSON View */}
                     <section>
-                        <Card className="overflow-hidden border-border bg-black shadow-2xl">
-                            <CardContent className="p-0">
+                        <details
+                            className="tyto-panel group overflow-hidden"
+                            open={stackTrace.length === 0}
+                        >
+                            <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-xs font-extrabold tracking-wide text-foreground uppercase">
+                                Raw event payload
+                                <span className="text-[10px] font-bold text-muted-foreground normal-case group-open:hidden">
+                                    Expand JSON
+                                </span>
+                                <span className="hidden text-[10px] font-bold text-muted-foreground normal-case group-open:inline">
+                                    Collapse JSON
+                                </span>
+                            </summary>
+                            <div className="border-t border-border bg-slate-950">
                                 <SyntaxHighlighter
                                     language="json"
                                     style={atomDark}
@@ -263,8 +314,8 @@ export default function IssueShow({
                                 >
                                     {JSON.stringify(payload, null, 4)}
                                 </SyntaxHighlighter>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </details>
                     </section>
 
                     {/* Activity Feed */}
@@ -321,6 +372,7 @@ export default function IssueShow({
                                         <textarea
                                             className="min-h-[100px] w-full resize-none border-none bg-transparent p-4 text-xs placeholder:text-muted-foreground/50 focus:ring-0"
                                             placeholder="Write your observation..."
+                                            maxLength={5000}
                                             value={data.comment}
                                             onChange={(e) =>
                                                 setData(
@@ -329,7 +381,10 @@ export default function IssueShow({
                                                 )
                                             }
                                         />
-                                        <div className="flex justify-end border-t border-border/50 bg-muted/20 p-2">
+                                        <div className="flex items-center justify-between border-t border-border/50 bg-muted/20 p-2">
+                                            <span className="px-2 text-[10px] text-muted-foreground tabular-nums">
+                                                {data.comment.length}/5000
+                                            </span>
                                             <Button
                                                 size="sm"
                                                 disabled={
@@ -351,7 +406,7 @@ export default function IssueShow({
 
                 {/* Sidebar */}
                 <div className="space-y-6 lg:col-span-4">
-                    <Card className="sticky top-6 border-border bg-card/50 shadow-sm">
+                    <Card className="sticky top-20 border-border bg-card/90 shadow-sm backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-muted/10">
                             <CardTitle className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
                                 Management
@@ -364,6 +419,7 @@ export default function IssueShow({
                                         <Tag className="size-3" /> Status
                                     </label>
                                     <Select
+                                        disabled={updating}
                                         value={issue.status}
                                         onValueChange={(v) =>
                                             updateIssue('status', v)
@@ -392,6 +448,7 @@ export default function IssueShow({
                                         Priority
                                     </label>
                                     <Select
+                                        disabled={updating}
                                         value={issue.priority}
                                         onValueChange={(v) =>
                                             updateIssue('priority', v)
@@ -425,6 +482,7 @@ export default function IssueShow({
                                         <UserIcon className="size-3" /> Assignee
                                     </label>
                                     <Select
+                                        disabled={updating}
                                         value={
                                             issue.assigned_to?.toString() ||
                                             'unassigned'

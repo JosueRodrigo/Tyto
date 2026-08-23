@@ -49,3 +49,35 @@ test('incident center filters by priority and exposes triage counts', function (
             ->where('counts.critical', 1)
         );
 });
+
+test('an incident cannot be assigned to a user outside its team', function () {
+    $team = Team::factory()->create();
+    $member = User::factory()->create();
+    $outsider = User::factory()->create();
+    $team->members()->attach($member, ['role' => TeamRole::Owner->value]);
+    $project = Project::factory()->create(['team_id' => $team->id]);
+    $issue = Issue::create([
+        'project_id' => $project->id,
+        'hash' => 'assignment-boundary',
+        'type' => 'exception',
+        'title' => 'Scoped incident',
+        'message' => 'Must remain inside its team',
+        'status' => 'open',
+        'priority' => 'high',
+    ]);
+
+    $this->actingAs($member)
+        ->from(route('issues.show', [
+            'current_team' => $team->slug,
+            'project' => $project->slug,
+            'issue' => $issue->id,
+        ]))
+        ->patch(route('issues.update', [
+            'current_team' => $team->slug,
+            'project' => $project->slug,
+            'issue' => $issue->id,
+        ]), ['assigned_to' => $outsider->id])
+        ->assertSessionHasErrors('assigned_to');
+
+    expect($issue->fresh()->assigned_to)->toBeNull();
+});
