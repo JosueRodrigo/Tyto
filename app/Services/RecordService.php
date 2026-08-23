@@ -613,6 +613,25 @@ class RecordService
     }
 
     /**
+     * Paginate raw signals for the cross-domain telemetry explorer.
+     */
+    public function getTelemetryRecords(Project $project, string $type = 'all', ?string $search = null, ?string $traceId = null, ?string $period = null, ?string $from = null, ?string $to = null): LengthAwarePaginator
+    {
+        $query = $project->records()
+            ->with('issue:id,status,priority')
+            ->forPeriod($period, $from, $to)
+            ->when($type !== 'all', fn ($builder) => $builder->where('type', $type))
+            ->when($traceId, fn ($builder) => $builder->where('trace_id', trim($traceId)))
+            ->latest();
+
+        if ($search) {
+            $this->applyMessageSearch($query, $search);
+        }
+
+        return $query->paginate(50)->withQueryString();
+    }
+
+    /**
      * A page of raw records, counted by the rollups rather than by the database.
      */
     protected function paginateRawRecords(Project $project, string $type, ?string $search, ?string $period, ?string $from, ?string $to, bool $searchMessage = false): LengthAwarePaginator
