@@ -77,7 +77,7 @@ export function IssueTable({
     return (
         <div className="overflow-x-auto">
             <Table>
-                <TableHeader className="border-b border-border bg-muted/30">
+                <TableHeader className="border-b border-border bg-muted/40">
                     <TableRow className="border-none hover:bg-transparent">
                         <TableHead className="hidden w-20 pl-6 md:table-cell">
                             <div className="flex cursor-pointer items-center gap-1 transition-colors hover:text-foreground">
@@ -119,7 +119,7 @@ export function IssueTable({
                     {data.map((issue: any) => (
                         <TableRow
                             key={issue.id}
-                            className="group h-16 border-border transition-colors hover:bg-muted/30"
+                            className="group h-[72px] border-border/70 transition-colors hover:bg-primary/[0.035]"
                         >
                             <TableCell className="hidden pl-6 font-mono text-xs text-muted-foreground md:table-cell">
                                 #{issue.id}
@@ -205,7 +205,7 @@ export function IssueTable({
                                 {formatCompactNumber(issue.records_count || 0)}
                             </TableCell>
                             <TableCell className="hidden text-right font-mono text-sm text-foreground lg:table-cell">
-                                1
+                                {formatCompactNumber(issue.users_count || 0)}
                             </TableCell>
                             <TableCell className="hidden text-right text-xs whitespace-nowrap text-muted-foreground xl:table-cell">
                                 {issue.created_at

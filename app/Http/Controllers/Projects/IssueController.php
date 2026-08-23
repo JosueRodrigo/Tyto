@@ -27,7 +27,7 @@ class IssueController extends Controller
      */
     public function index(Request $request, Team $current_team, Project $project): Response
     {
-        $filters = $request->only(['status', 'search']);
+        $filters = $request->only(['status', 'priority', 'search']);
 
         return Inertia::render('projects/issues/index', [
             'issues' => $this->issueService->getPaginatedIssues($project, $filters),

@@ -29,6 +29,9 @@ class IssueService
             ->when($status === 'mine', function ($q) {
                 return $q->where('assigned_to', auth()->id());
             })
+            ->when(isset($filters['priority']) && $filters['priority'] !== 'all', function ($q) use ($filters) {
+                return $q->where('priority', $filters['priority']);
+            })
             ->when(isset($filters['search']), function ($q) use ($filters) {
                 return $q->where(function ($sq) use ($filters) {
                     $sq->where('title', 'like', '%'.$filters['search'].'%')
@@ -136,10 +139,20 @@ class IssueService
      */
     public function getIssueCounts(Project $project): array
     {
+        $counts = $project->issues()
+            ->selectRaw("SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count")
+            ->selectRaw("SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved_count")
+            ->selectRaw("SUM(CASE WHEN status = 'ignored' THEN 1 ELSE 0 END) as ignored_count")
+            ->selectRaw("SUM(CASE WHEN status = 'open' AND assigned_to IS NULL THEN 1 ELSE 0 END) as unassigned_count")
+            ->selectRaw("SUM(CASE WHEN status = 'open' AND priority = 'critical' THEN 1 ELSE 0 END) as critical_count")
+            ->first();
+
         return [
-            'open' => $project->issues()->where('status', 'open')->count(),
-            'resolved' => $project->issues()->where('status', 'resolved')->count(),
-            'ignored' => $project->issues()->where('status', 'ignored')->count(),
+            'open' => (int) ($counts->open_count ?? 0),
+            'resolved' => (int) ($counts->resolved_count ?? 0),
+            'ignored' => (int) ($counts->ignored_count ?? 0),
+            'unassigned' => (int) ($counts->unassigned_count ?? 0),
+            'critical' => (int) ($counts->critical_count ?? 0),
         ];
     }
 }
