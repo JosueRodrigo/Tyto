@@ -7,6 +7,7 @@ use App\Http\Controllers\Projects\IntegrationController;
 use App\Http\Controllers\Projects\IssueController;
 use App\Http\Controllers\Projects\ProjectController;
 use App\Http\Controllers\Projects\RecordController;
+use App\Http\Controllers\Projects\StatusPageController;
 use App\Http\Controllers\Projects\ThresholdController;
 use App\Http\Controllers\Projects\UptimeController;
 use App\Http\Controllers\Teams\TeamController;
@@ -16,6 +17,8 @@ use App\Http\Middleware\EnsureTeamMembership;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::get('status/{slug}', [StatusPageController::class, 'show'])->name('status.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function (Request $request) {
@@ -131,6 +134,8 @@ Route::prefix('{current_team}/{project}')
         Route::delete('/', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
         Route::get('settings', [IntegrationController::class, 'index'])->name('project.settings');
+        Route::get('status-page', [StatusPageController::class, 'edit'])->name('status-page.edit');
+        Route::patch('status-page', [StatusPageController::class, 'update'])->name('status-page.update');
     });
 
 Route::prefix('{current_team}')

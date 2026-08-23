@@ -42,6 +42,10 @@ class Project extends Model implements HasMedia
         'api_token',
         'url',
         'uptime_monitoring_enabled',
+        'status_page_enabled',
+        'status_page_slug',
+        'status_page_title',
+        'status_page_show_heartbeats',
         'uptime_check_interval',
         'last_uptime_check_at',
         'last_uptime_status',
@@ -75,6 +79,8 @@ class Project extends Model implements HasMedia
         'settings' => 'array',
         'last_uptime_check_at' => 'datetime',
         'uptime_monitoring_enabled' => 'boolean',
+        'status_page_enabled' => 'boolean',
+        'status_page_show_heartbeats' => 'boolean',
     ];
 
     /**

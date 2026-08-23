@@ -14,6 +14,7 @@ createInertiaApp({
     layout: (name) => {
         switch (true) {
             case name === 'projects/create/index' || name === 'teams/create':
+            case name.startsWith('status/'):
                 return null;
 
             case name.startsWith('auth/'):
