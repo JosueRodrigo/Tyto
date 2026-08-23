@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="art/banner.png" alt="Tyto Banner" width="100%">
+  <img src="art/tyto-lockup.svg" alt="Tyto — observability without blind spots" width="100%">
 </p>
 
 <p align="center">

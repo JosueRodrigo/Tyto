@@ -17,7 +17,7 @@
 <body class="h-full bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center p-6 text-center text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
     <div class="relative mb-8">
         <div class="absolute -inset-4 bg-green-500/10 blur-2xl rounded-full"></div>
-        <img src="/logo.png" alt="Tyto" class="relative w-24 h-24 object-contain">
+        <img src="/favicon.svg" alt="Tyto" class="relative w-24 h-24 object-contain">
     </div>
     
     <div class="space-y-4">

@@ -63,74 +63,78 @@
 }
 
 :root {
-    --background: oklch(0.975 0.009 247);
-    --foreground: oklch(0.2 0.035 249);
-    --card: oklch(0.995 0.004 247);
-    --card-foreground: oklch(0.2 0.035 249);
+    --background: oklch(0.975 0.008 285);
+    --foreground: oklch(0.19 0.035 285);
+    --card: oklch(0.995 0.004 285);
+    --card-foreground: oklch(0.19 0.035 285);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.2 0.035 249);
-    --primary: oklch(0.55 0.145 184);
-    --primary-foreground: oklch(0.99 0.005 184);
+    --primary: #9f55ff;
+    --primary-foreground: #ffffff;
     --secondary: oklch(0.94 0.018 247);
     --secondary-foreground: oklch(0.27 0.04 249);
     --muted: oklch(0.945 0.014 247);
     --muted-foreground: oklch(0.51 0.032 249);
-    --accent: oklch(0.93 0.035 184);
-    --accent-foreground: oklch(0.3 0.085 184);
+    --accent: oklch(0.93 0.04 300);
+    --accent-foreground: oklch(0.35 0.16 300);
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.577 0.245 27.325);
     --border: oklch(0.89 0.018 247);
     --input: oklch(0.89 0.018 247);
-    --ring: oklch(0.55 0.145 184);
-    --chart-1: oklch(0.61 0.16 184);
+    --ring: #9f55ff;
+    --chart-1: #9f55ff;
     --chart-2: oklch(0.63 0.18 35);
     --chart-3: oklch(0.61 0.16 252);
     --chart-4: oklch(0.7 0.15 92);
-    --chart-5: oklch(0.59 0.18 315);
-    --radius: 0.75rem;
-    --sidebar: oklch(0.225 0.04 251);
+    --chart-5: oklch(0.68 0.18 315);
+    --radius: 0.875rem;
+    --sidebar: #101020;
     --sidebar-foreground: oklch(0.92 0.018 247);
-    --sidebar-primary: oklch(0.67 0.15 184);
+    --sidebar-primary: #9f55ff;
     --sidebar-primary-foreground: oklch(0.18 0.035 251);
     --sidebar-accent: oklch(0.29 0.045 251);
     --sidebar-accent-foreground: oklch(0.98 0.005 247);
     --sidebar-border: oklch(1 0 0 / 8%);
-    --sidebar-ring: oklch(0.67 0.15 184);
+    --sidebar-ring: #9f55ff;
+    --logo-face: #eaeaea;
+    --logo-ink: #050510;
 }
 
 .dark {
-    --background: oklch(0.17 0.035 251);
-    --foreground: oklch(0.94 0.014 247);
-    --card: oklch(0.215 0.038 251);
+    --background: #050510;
+    --foreground: #eaeaea;
+    --card: #101020;
     --card-foreground: oklch(0.94 0.014 247);
     --popover: oklch(0.225 0.04 251);
     --popover-foreground: oklch(0.94 0.014 247);
-    --primary: oklch(0.67 0.15 184);
-    --primary-foreground: oklch(0.16 0.035 251);
+    --primary: #9f55ff;
+    --primary-foreground: #ffffff;
     --secondary: oklch(0.265 0.04 251);
     --secondary-foreground: oklch(0.94 0.014 247);
     --muted: oklch(0.255 0.035 251);
     --muted-foreground: oklch(0.68 0.025 247);
-    --accent: oklch(0.29 0.055 184);
-    --accent-foreground: oklch(0.88 0.09 184);
+    --accent: oklch(0.27 0.07 300);
+    --accent-foreground: oklch(0.9 0.08 300);
     --destructive: oklch(0.704 0.191 22.216);
     --destructive-foreground: oklch(0.637 0.237 25.331);
     --border: oklch(1 0 0 / 9%);
     --input: oklch(1 0 0 / 12%);
-    --ring: oklch(0.67 0.15 184);
-    --chart-1: oklch(0.67 0.15 184);
+    --ring: #9f55ff;
+    --chart-1: #9f55ff;
     --chart-2: oklch(0.7 0.17 35);
     --chart-3: oklch(0.67 0.15 252);
     --chart-4: oklch(0.75 0.15 92);
     --chart-5: oklch(0.68 0.17 315);
-    --sidebar: oklch(0.145 0.035 251);
+    --sidebar: #050510;
     --sidebar-foreground: oklch(0.88 0.018 247);
-    --sidebar-primary: oklch(0.67 0.15 184);
+    --sidebar-primary: #9f55ff;
     --sidebar-primary-foreground: oklch(0.15 0.035 251);
     --sidebar-accent: oklch(0.22 0.045 251);
     --sidebar-accent-foreground: oklch(0.98 0.005 247);
     --sidebar-border: oklch(1 0 0 / 7%);
-    --sidebar-ring: oklch(0.67 0.15 184);
+    --sidebar-ring: #9f55ff;
+    --logo-face: #eaeaea;
+    --logo-ink: #050510;
 }
 
 @layer base {
@@ -143,12 +147,12 @@
         background-image:
             radial-gradient(
                 circle at 80% 0%,
-                oklch(0.67 0.15 184 / 7%),
+                rgb(159 85 255 / 10%),
                 transparent 28rem
             ),
             radial-gradient(
                 circle at 20% 100%,
-                oklch(0.63 0.18 35 / 5%),
+                rgb(159 85 255 / 5%),
                 transparent 32rem
             );
         background-attachment: fixed;
@@ -181,7 +185,7 @@
 
 @layer components {
     .tyto-panel {
-        @apply rounded-xl border border-border/80 bg-card/90 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.04)] backdrop-blur-sm;
+        @apply rounded-2xl border border-border/70 bg-card/90 shadow-[0_1px_2px_rgba(5,5,16,0.08),0_18px_50px_rgba(5,5,16,0.08)] backdrop-blur-xl;
     }
 
     .tyto-grid {

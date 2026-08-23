@@ -23,7 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tyto.token' => VerifyTytoToken::class,
             'tyto.ingestion' => ProtectTytoIngestion::class,
-            'laraowl.token' => VerifyTytoToken::class,
         ]);
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);

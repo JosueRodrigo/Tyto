@@ -11,13 +11,10 @@
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "Abdelmjid Saber",
-            "homepage": "https://github.com/megoxv"
+            "name": "Josué Vieira Gomes",
+            "homepage": "https://integrad.com.br"
         }
     ],
-    "replace": {
-        "laraowl/laraowl": "self.version"
-    },
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.0",
