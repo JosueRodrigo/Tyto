@@ -287,7 +287,7 @@ export default function FirewallRules({
                                     </h3>
                                     <p className="text-xs text-muted-foreground">
                                         Keep specific IP addresses from being
-                                        blocked by Laraowl and Cloudflare
+                                        blocked by Tyto and Cloudflare
                                         mitigations.
                                     </p>
                                 </div>
