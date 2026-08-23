@@ -102,6 +102,8 @@ class RecordService
         $this->enrichUserRows($project, $impactedUsers);
         $this->enrichUserRows($project, $activeUsers);
 
+        $operationalHealth = $this->getOperationalHealth($project);
+
         return [
             'total_requests' => (int) $requestStats->total,
             'request_breakdown' => [
@@ -135,6 +137,54 @@ class RecordService
                 'current' => $project->last_uptime_status ?? 'unknown',
                 'last_check' => $project->last_uptime_check_at ? $project->last_uptime_check_at->toIso8601String() : null,
                 'url' => $project->url,
+            ],
+            'operational_health' => $operationalHealth,
+        ];
+    }
+
+    /**
+     * Build a current-state summary without mixing operational health into the
+     * selected telemetry time window.
+     */
+    public function getOperationalHealth(Project $project): array
+    {
+        $heartbeatCounts = $project->heartbeats()->get()->map->effectiveStatus()->countBy();
+        $issues = $project->issues()
+            ->where('status', 'open')
+            ->selectRaw('COUNT(*) as open_count')
+            ->selectRaw("SUM(CASE WHEN priority = 'critical' THEN 1 ELSE 0 END) as critical_count")
+            ->selectRaw('SUM(CASE WHEN assigned_to IS NULL THEN 1 ELSE 0 END) as unassigned_count')
+            ->first();
+
+        $failingHeartbeats = (int) $heartbeatCounts->get('failing', 0);
+        $criticalIssues = (int) ($issues->critical_count ?? 0);
+        $openIssues = (int) ($issues->open_count ?? 0);
+        $uptimeStatus = $project->uptime_monitoring_enabled
+            ? ($project->last_uptime_status ?? 'unknown')
+            : 'disabled';
+
+        $status = match (true) {
+            $uptimeStatus === 'down', $failingHeartbeats > 0, $criticalIssues > 0 => 'critical',
+            $uptimeStatus === 'unknown', $openIssues > 0, $heartbeatCounts->get('inactive', 0) > 0 => 'warning',
+            default => 'healthy',
+        };
+
+        return [
+            'status' => $status,
+            'uptime' => [
+                'status' => $uptimeStatus,
+                'last_check' => $project->last_uptime_check_at?->toIso8601String(),
+            ],
+            'heartbeats' => [
+                'total' => $heartbeatCounts->sum(),
+                'healthy' => (int) $heartbeatCounts->get('active', 0),
+                'failing' => $failingHeartbeats,
+                'inactive' => (int) $heartbeatCounts->get('inactive', 0),
+            ],
+            'incidents' => [
+                'open' => $openIssues,
+                'critical' => $criticalIssues,
+                'unassigned' => (int) ($issues->unassigned_count ?? 0),
             ],
         ];
     }

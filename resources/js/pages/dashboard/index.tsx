@@ -6,6 +6,8 @@ import {
     CheckCircle2,
     Clock3,
     Gauge,
+    Globe2,
+    HeartPulse,
     Radio,
     ServerCog,
     Users,
@@ -56,6 +58,17 @@ type DashboardProps = {
     auth_users_count: number;
     guest_users_count: number;
     uptime_status?: { current?: string; last_check?: string };
+    operational_health?: {
+        status: 'healthy' | 'warning' | 'critical';
+        uptime: { status: string; last_check?: string };
+        heartbeats: {
+            total: number;
+            healthy: number;
+            failing: number;
+            inactive: number;
+        };
+        incidents: { open: number; critical: number; unassigned: number };
+    };
     period: string;
     from?: string;
     to?: string;
@@ -92,6 +105,7 @@ export default function Dashboard(props: DashboardProps) {
         : 0;
     const averageDuration = props.duration_stats?.avg || 0;
     const jobsFailed = props.job_stats?.failed || 0;
+    const operationalHealth = props.operational_health;
 
     return (
         <>
@@ -178,6 +192,111 @@ export default function Dashboard(props: DashboardProps) {
                         tone={errorRate > 1 ? 'critical' : 'healthy'}
                     />
                 </section>
+
+                {operationalHealth && (
+                    <section className="tyto-panel overflow-hidden">
+                        <div className="flex flex-col justify-between gap-3 border-b border-border/70 p-5 sm:flex-row sm:items-center">
+                            <div>
+                                <div className="flex items-center gap-2 font-extrabold text-foreground">
+                                    <span
+                                        className={`size-2.5 rounded-full ${
+                                            operationalHealth.status ===
+                                            'critical'
+                                                ? 'animate-pulse bg-red-500'
+                                                : operationalHealth.status ===
+                                                    'warning'
+                                                  ? 'bg-amber-500'
+                                                  : 'bg-emerald-500'
+                                        }`}
+                                    />
+                                    Service health
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Current state across availability, recurring
+                                    processes and incidents.
+                                </p>
+                            </div>
+                            <Badge
+                                className={
+                                    operationalHealth.status === 'critical'
+                                        ? 'bg-red-500/10 text-red-700 dark:text-red-300'
+                                        : operationalHealth.status === 'warning'
+                                          ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300'
+                                          : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                }
+                            >
+                                {operationalHealth.status === 'critical'
+                                    ? 'Action required'
+                                    : operationalHealth.status === 'warning'
+                                      ? 'Needs attention'
+                                      : 'All systems healthy'}
+                            </Badge>
+                        </div>
+                        <div className="grid gap-px bg-border/70 md:grid-cols-3">
+                            <Link
+                                href={href('uptime')}
+                                className="group bg-card p-5 transition-colors hover:bg-primary/[0.035]"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <span className="rounded-lg bg-blue-500/10 p-2 text-blue-600 dark:text-blue-300">
+                                        <Globe2 className="size-4" />
+                                    </span>
+                                    <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                                </div>
+                                <div className="mt-4 font-bold text-foreground">
+                                    Uptime
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground capitalize">
+                                    {operationalHealth.uptime.status ===
+                                    'disabled'
+                                        ? 'Monitoring disabled'
+                                        : operationalHealth.uptime.status ===
+                                            'unknown'
+                                          ? 'Waiting for first check'
+                                          : operationalHealth.uptime.status}
+                                </p>
+                            </Link>
+                            <Link
+                                href={href('heartbeats')}
+                                className="group bg-card p-5 transition-colors hover:bg-primary/[0.035]"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <span className="rounded-lg bg-violet-500/10 p-2 text-violet-600 dark:text-violet-300">
+                                        <HeartPulse className="size-4" />
+                                    </span>
+                                    <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                                </div>
+                                <div className="mt-4 font-bold text-foreground">
+                                    Heartbeats
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {operationalHealth.heartbeats.failing > 0
+                                        ? `${operationalHealth.heartbeats.failing} missing check-ins`
+                                        : `${operationalHealth.heartbeats.healthy}/${operationalHealth.heartbeats.total} healthy`}
+                                </p>
+                            </Link>
+                            <Link
+                                href={href('issues')}
+                                className="group bg-card p-5 transition-colors hover:bg-primary/[0.035]"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <span className="rounded-lg bg-red-500/10 p-2 text-red-600 dark:text-red-300">
+                                        <AlertTriangle className="size-4" />
+                                    </span>
+                                    <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+                                </div>
+                                <div className="mt-4 font-bold text-foreground">
+                                    Incidents
+                                </div>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {operationalHealth.incidents.open} open ·{' '}
+                                    {operationalHealth.incidents.critical}{' '}
+                                    critical
+                                </p>
+                            </Link>
+                        </div>
+                    </section>
+                )}
 
                 {props.total_requests === 0 && (
                     <section className="tyto-panel flex flex-col gap-5 border-primary/20 bg-primary/[0.04] p-6 md:flex-row md:items-center md:justify-between">
