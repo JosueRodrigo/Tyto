@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use App\Mcp\Tools\QueryTelemetry;
 use App\Models\Project;
 use App\Models\Record;
@@ -17,7 +17,7 @@ it('returns recent records of a type for an accessible project, sanitized', func
     ]);
     Record::factory()->for($project)->create(['type' => 'query', 'payload' => ['sql' => 'select 1'], 'created_at' => now()]);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(QueryTelemetry::class, ['project' => 'api', 'type' => 'request'])
         ->assertOk()
         ->assertSee('/login')
@@ -31,7 +31,7 @@ it('refuses telemetry for an inaccessible project', function () {
     $other = User::factory()->create();
     Project::factory()->for($other->currentTeam)->create(['slug' => 'private']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(QueryTelemetry::class, ['project' => 'private', 'type' => 'request'])
         ->assertHasErrors();
 });

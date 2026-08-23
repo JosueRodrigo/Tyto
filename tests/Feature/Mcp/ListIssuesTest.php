@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use App\Mcp\Tools\ListIssues;
 use App\Models\Issue;
 use App\Models\Project;
@@ -13,7 +13,7 @@ it('lists issues for an accessible project and filters by status', function () {
     Issue::create(['project_id' => $project->id, 'hash' => 'a', 'type' => 'exception', 'title' => 'Open Bug', 'message' => '', 'status' => 'open', 'last_seen_at' => now()]);
     Issue::create(['project_id' => $project->id, 'hash' => 'b', 'type' => 'exception', 'title' => 'Fixed Bug', 'message' => '', 'status' => 'resolved', 'last_seen_at' => now()]);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(ListIssues::class, ['project' => 'shop', 'status' => 'open'])
         ->assertOk()
         ->assertSee('Open Bug')
@@ -25,7 +25,7 @@ it('rejects a project the user cannot access', function () {
     $other = User::factory()->create();
     Project::factory()->for($other->currentTeam)->create(['slug' => 'secret']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(ListIssues::class, ['project' => 'secret'])
         ->assertHasErrors();
 });

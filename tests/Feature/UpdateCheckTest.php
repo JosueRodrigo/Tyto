@@ -1,6 +1,6 @@
 <?php
 
-use App\Console\Commands\UpdateLaraOwl;
+use App\Console\Commands\UpdateTyto;
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
@@ -18,7 +18,7 @@ function githubRelease(string $tag): array
 {
     return [
         'tag_name' => $tag,
-        'name' => "LaraOwl {$tag}",
+        'name' => "Tyto {$tag}",
         'html_url' => "https://github.com/JosueRodrigo/Tyto/releases/tag/{$tag}",
         'body' => 'Fixed the integrations URL bug.',
         'published_at' => '2026-07-09T12:00:00Z',
@@ -121,10 +121,10 @@ test('a failed github request does not cache anything', function () {
 });
 
 test('a pending update is reported only when the cached release is newer', function () {
-    cacheRelease(new Release('99.0.0', 'LaraOwl 99', 'https://example.com'));
+    cacheRelease(new Release('99.0.0', 'Tyto 99', 'https://example.com'));
     expect(app(UpdateService::class)->pendingUpdate()?->version)->toBe('99.0.0');
 
-    cacheRelease(new Release('0.0.1', 'LaraOwl 0.0.1', 'https://example.com'));
+    cacheRelease(new Release('0.0.1', 'Tyto 0.0.1', 'https://example.com'));
     expect(app(UpdateService::class)->pendingUpdate())->toBeNull();
 });
 
@@ -132,7 +132,7 @@ test('checking for updates can be disabled entirely', function () {
     config(['tyto.update_check.enabled' => false]);
     Http::fake();
 
-    cacheRelease(new Release('99.0.0', 'LaraOwl 99', 'https://example.com'));
+    cacheRelease(new Release('99.0.0', 'Tyto 99', 'https://example.com'));
 
     expect(app(UpdateService::class)->pendingUpdate())->toBeNull()
         ->and(app(UpdateService::class)->refresh())->toBeNull();
@@ -157,7 +157,8 @@ test('a payload cached by an older version is discarded and re-fetched', functio
         'api.github.com/*' => Http::response(githubRelease('v99.0.0')),
     ]);
 
-    // What an older LaraOwl left behind: a serialized Release, which this cache
+    // What an older LaraOwl installation left behind: a serialized Release,
+    // which this cache
     // hands back as an incomplete class rather than a usable object.
     $legacy = throughCacheSerialization(new Release('1.0.7', 'v1.0.7', 'https://example.com/107'));
     Cache::put(UpdateService::CACHE_KEY, ['release' => $legacy], 3600);
@@ -171,7 +172,7 @@ test('a payload cached by an older version is discarded and re-fetched', functio
 });
 
 test('the instance operator is shown a pending update', function () {
-    cacheRelease(new Release('99.0.0', 'LaraOwl 99', 'https://example.com/99'));
+    cacheRelease(new Release('99.0.0', 'Tyto 99', 'https://example.com/99'));
 
     $this->actingAs(instanceOperator())
         ->get(route('teams.index'))
@@ -198,7 +199,7 @@ test('users other than the operator are not shown a pending update', function ()
     $other = User::factory()->create();
     Team::factory()->create()->members()->attach($other, ['role' => TeamRole::Owner->value]);
 
-    cacheRelease(new Release('99.0.0', 'LaraOwl 99', 'https://example.com/99'));
+    cacheRelease(new Release('99.0.0', 'Tyto 99', 'https://example.com/99'));
 
     $this->actingAs($other)
         ->get(route('teams.index'))
@@ -219,8 +220,8 @@ test('the update command reports when the instance is up to date', function () {
     ]);
     Process::fake();
 
-    $this->artisan('laraowl:update')
-        ->expectsOutputToContain('LaraOwl is up to date')
+    $this->artisan('tyto:update')
+        ->expectsOutputToContain('Tyto is up to date')
         ->assertExitCode(0);
 
     Process::assertNothingRan();
@@ -232,8 +233,8 @@ test('the update command with --check reports an available release without insta
     ]);
     Process::fake();
 
-    $this->artisan('laraowl:update --check')
-        ->expectsOutputToContain('LaraOwl v99.0.0 is available')
+    $this->artisan('tyto:update --check')
+        ->expectsOutputToContain('Tyto v99.0.0 is available')
         ->assertExitCode(0);
 
     Process::assertNothingRan();
@@ -245,13 +246,13 @@ test('the update command with --dry-run prints the steps without running them', 
     ]);
     Process::fake();
 
-    $this->artisan('laraowl:update --dry-run')
+    $this->artisan('tyto:update --dry-run')
         ->expectsOutputToContain('Dry run')
         ->expectsOutputToContain('git pull --ff-only')
         ->expectsOutputToContain('migrate --force')
         // Without this an upgraded instance renders an empty dashboard: the new
         // rollup tables exist but hold nothing.
-        ->expectsOutputToContain('laraowl:rollups:backfill --missing')
+        ->expectsOutputToContain('tyto:rollups:backfill --missing')
         ->assertExitCode(0);
 
     Process::assertNothingRan();
@@ -264,13 +265,13 @@ test('the update command installs the release in maintenance mode', function () 
     ]);
     Process::fake();
 
-    $this->artisan('laraowl:update --force')
-        ->expectsOutputToContain('LaraOwl has been updated to v99.0.0')
+    $this->artisan('tyto:update --force')
+        ->expectsOutputToContain('Tyto has been updated to v99.0.0')
         ->assertExitCode(0);
 
     Process::assertRan(fn ($process) => $process->command === ['git', 'pull', '--ff-only']);
     Process::assertRan(fn ($process) => in_array('migrate', $process->command, true));
-    Process::assertRan(fn ($process) => in_array('laraowl:rollups:backfill', $process->command, true));
+    Process::assertRan(fn ($process) => in_array('tyto:rollups:backfill', $process->command, true));
     Process::assertRan(fn ($process) => in_array('queue:restart', $process->command, true));
 
     expect(app()->isDownForMaintenance())->toBeFalse();
@@ -288,7 +289,7 @@ test('a failed step aborts the update and lifts maintenance mode', function () {
             : Process::result(''),
     ]);
 
-    $this->artisan('laraowl:update --force')
+    $this->artisan('tyto:update --force')
         ->expectsOutputToContain('Step failed: Installing JS dependencies')
         ->assertExitCode(1);
 
@@ -298,7 +299,7 @@ test('a failed step aborts the update and lifts maintenance mode', function () {
 })->skip(fn () => ! is_dir(base_path('.git')), 'Requires a git checkout.');
 
 test('the backfill runs after the migrations that create its tables', function () {
-    $command = new UpdateLaraOwl;
+    $command = new UpdateTyto;
     $steps = (new ReflectionMethod($command, 'steps'))->invoke($command);
     $labels = array_keys($steps);
 
@@ -312,7 +313,7 @@ test('the update command fails when github cannot be reached', function () {
     ]);
     Process::fake();
 
-    $this->artisan('laraowl:update --check')
+    $this->artisan('tyto:update --check')
         ->expectsOutputToContain('Could not reach the GitHub releases API')
         ->assertExitCode(1);
 });
@@ -321,7 +322,7 @@ test('the update command refuses to run when update checks are disabled', functi
     config(['tyto.update_check.enabled' => false]);
     Http::fake();
 
-    $this->artisan('laraowl:update')
+    $this->artisan('tyto:update')
         ->expectsOutputToContain('Update checks are disabled')
         ->assertExitCode(1);
 

@@ -96,7 +96,7 @@ test('the backfill lifts the message out of legacy log payloads', function () {
 
     expect(Record::where('project_id', $project->id)->value('message'))->toBeNull();
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
 
     expect(Record::where('project_id', $project->id)->value('message'))->toBe('warning legacy disk warning')
         ->and(logResults($project, 'disk'))->toBe(['legacy disk warning']);

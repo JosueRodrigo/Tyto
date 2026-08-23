@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use App\Mcp\Tools\CommentOnIssue;
 use App\Models\Issue;
 use App\Models\IssueActivity;
@@ -12,7 +12,7 @@ it('adds an attributed comment activity', function () {
     $project = Project::factory()->for($user->currentTeam)->create();
     $issue = Issue::create(['project_id' => $project->id, 'hash' => 'h', 'type' => 'exception', 'title' => 'Bug', 'status' => 'open', 'last_seen_at' => now(), 'message' => '']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(CommentOnIssue::class, ['issue' => $issue->id, 'body' => 'Likely a null guard.'])
         ->assertOk();
 
@@ -28,7 +28,7 @@ it('cannot comment on an issue outside the user\'s teams', function () {
     $project = Project::factory()->for($other->currentTeam)->create();
     $issue = Issue::create(['project_id' => $project->id, 'hash' => 'h', 'type' => 'exception', 'title' => 'Bug', 'status' => 'open', 'last_seen_at' => now(), 'message' => '']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(CommentOnIssue::class, ['issue' => $issue->id, 'body' => 'hi'])
         ->assertHasErrors();
 

@@ -191,7 +191,7 @@ export default function Dashboard(props: DashboardProps) {
                             </p>
                         </div>
                         <code className="rounded-lg border border-border bg-background px-4 py-2.5 font-mono text-xs text-foreground">
-                            composer require laraowl/client
+                            composer require tyto/agent
                         </code>
                     </section>
                 )}

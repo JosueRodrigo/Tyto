@@ -12,10 +12,12 @@ class CreateTeamCommand extends Command
 {
     use ResolvesConsoleIdentifiers;
 
-    protected $signature = 'laraowl:teams:create
+    protected $signature = 'tyto:teams:create
                             {name : The team name}
                             {owner : Owner user ID or email}
                             {--personal : Mark the team as the owner\'s personal team}';
+
+    protected $aliases = ['laraowl:teams:create'];
 
     protected $description = 'Create a team and assign an owner, mirroring the "New team" web flow';
 

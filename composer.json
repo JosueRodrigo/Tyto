@@ -1,11 +1,12 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laraowl/laraowl",
+    "name": "tyto/tyto",
     "type": "project",
-    "description": "LaraOwl - The ultimate open-source, self-hosted monitoring platform for Laravel.",
+    "description": "Tyto - open-source, self-hosted application observability for Laravel.",
     "keywords": [
         "laravel",
-        "framework"
+        "observability",
+        "monitoring"
     ],
     "license": "Apache-2.0",
     "authors": [
@@ -14,6 +15,9 @@
             "homepage": "https://github.com/megoxv"
         }
     ],
+    "replace": {
+        "laraowl/laraowl": "self.version"
+    },
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.0",

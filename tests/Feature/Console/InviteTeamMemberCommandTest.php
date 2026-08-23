@@ -14,7 +14,7 @@ test('a member can be invited and defaults to the team owner as inviter', functi
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $this->artisan('laraowl:teams:invite', [
+    $this->artisan('tyto:teams:invite', [
         'team' => $team->slug,
         'email' => 'invited@example.com',
     ])->assertExitCode(0);
@@ -36,7 +36,7 @@ test('invitation email can be skipped with --no-notify', function () {
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $this->artisan('laraowl:teams:invite', [
+    $this->artisan('tyto:teams:invite', [
         'team' => $team->slug,
         'email' => 'invited@example.com',
         '--no-notify' => true,
@@ -54,7 +54,7 @@ test('an explicit inviter can be given via --by', function () {
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($admin, ['role' => TeamRole::Admin->value]);
 
-    $this->artisan('laraowl:teams:invite', [
+    $this->artisan('tyto:teams:invite', [
         'team' => $team->slug,
         'email' => 'invited@example.com',
         '--by' => $admin->email,
@@ -75,7 +75,7 @@ test('existing members cannot be invited again', function () {
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
     $team->members()->attach($member, ['role' => TeamRole::Member->value]);
 
-    $this->artisan('laraowl:teams:invite', [
+    $this->artisan('tyto:teams:invite', [
         'team' => $team->slug,
         'email' => 'member@example.com',
     ])->assertExitCode(1);
@@ -91,7 +91,7 @@ test('--accept immediately joins an existing user to the team', function () {
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $this->artisan('laraowl:teams:invite', [
+    $this->artisan('tyto:teams:invite', [
         'team' => $team->slug,
         'email' => 'invited@example.com',
         '--accept' => true,
@@ -110,7 +110,7 @@ test('--accept leaves the invitation pending when no matching user exists yet', 
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $this->artisan('laraowl:teams:invite', [
+    $this->artisan('tyto:teams:invite', [
         'team' => $team->slug,
         'email' => 'not-yet-registered@example.com',
         '--accept' => true,

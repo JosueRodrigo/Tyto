@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use Laravel\Mcp\Facades\Mcp;
 
-Mcp::web('/mcp', LaraowlServer::class)->middleware(['auth:sanctum']);
+Mcp::web('/mcp', TytoServer::class)->middleware(['auth:sanctum']);

@@ -10,7 +10,7 @@ test('a project is created with the team owner as default alert email', function
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $this->artisan('laraowl:projects:create', [
+    $this->artisan('tyto:projects:create', [
         'team' => $team->slug,
         'name' => 'My App',
         '--url' => 'https://example.com',
@@ -31,7 +31,7 @@ test('the default alert email can be overridden with --email', function () {
     $team = Team::factory()->create();
     $team->members()->attach($owner, ['role' => TeamRole::Owner->value]);
 
-    $this->artisan('laraowl:projects:create', [
+    $this->artisan('tyto:projects:create', [
         'team' => $team->slug,
         'name' => 'My App',
         '--email' => 'alerts@example.com',
@@ -43,14 +43,14 @@ test('the default alert email can be overridden with --email', function () {
 });
 
 test('project creation fails for an unknown team', function () {
-    $this->artisan('laraowl:projects:create', ['team' => 'missing-team', 'name' => 'My App'])
+    $this->artisan('tyto:projects:create', ['team' => 'missing-team', 'name' => 'My App'])
         ->assertExitCode(1);
 });
 
 test('project creation fails when the team has no owner and no --email is given', function () {
     $team = Team::factory()->create();
 
-    $this->artisan('laraowl:projects:create', ['team' => $team->slug, 'name' => 'My App'])
+    $this->artisan('tyto:projects:create', ['team' => $team->slug, 'name' => 'My App'])
         ->assertExitCode(1);
 
     $this->assertDatabaseMissing('projects', ['name' => 'My App']);
