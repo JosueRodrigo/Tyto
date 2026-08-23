@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Heartbeat;
 use App\Models\Project;
 use App\Services\AlertService;
-use App\Services\IntegrationService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -110,7 +109,7 @@ class CheckProjectUptime extends Command
         // Trigger Alert if status recovered to 'up'
         if ($status === 'up' && $previousStatus === 'down') {
             $this->info("Project {$project->name} is back UP.");
-            $this->notifyRecovery($project, $alertService);
+            $alertService->notifyUptimeRecovered($project);
         }
     }
 
@@ -127,32 +126,4 @@ class CheckProjectUptime extends Command
         }
     }
 
-    protected function notifyRecovery(Project $project, AlertService $alertService)
-    {
-        $rules = $project->alertRules()
-            ->where('event_type', 'uptime_down')
-            ->where('is_enabled', true)
-            ->with('integrations')
-            ->get();
-
-        foreach ($rules as $rule) {
-            foreach ($rule->integrations as $integration) {
-                if (! $integration->is_enabled) {
-                    continue;
-                }
-
-                app(IntegrationService::class)->send(
-                    $integration,
-                    "✅ Project Back Online: {$project->name}",
-                    'Your project is responding correctly again.',
-                    [
-                        'Project' => $project->name,
-                        'URL' => $project->url,
-                        'Status' => 'UP',
-                    ],
-                    $project->dashboardUrl()
-                );
-            }
-        }
-    }
 }

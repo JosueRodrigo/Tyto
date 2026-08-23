@@ -21,6 +21,7 @@ import {
     Shield,
     Lock as LockIcon,
     ScanSearch,
+    Siren,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -134,6 +135,11 @@ export function AppSidebar() {
     const uptimeEnabled = currentProject?.uptime_monitoring_enabled ?? true;
 
     const monitoringNavItems: NavItem[] = [
+        {
+            title: 'Alert delivery',
+            href: withPeriod(`/${teamSlug}/${projectSlug}/alerts`),
+            icon: Siren,
+        },
         {
             title: 'Users',
             href: withPeriod(`/${teamSlug}/${projectSlug}/users`),

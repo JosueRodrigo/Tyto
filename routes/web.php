@@ -120,6 +120,7 @@ Route::prefix('{current_team}/{project}')
         Route::post('alerts', [AlertRuleController::class, 'store'])->name('alerts.store');
         Route::patch('alerts/{rule}', [AlertRuleController::class, 'update'])->name('alerts.update');
         Route::delete('alerts/{rule}', [AlertRuleController::class, 'destroy'])->name('alerts.destroy');
+        Route::post('alerts/deliveries/{delivery}/retry', [AlertRuleController::class, 'retry'])->name('alerts.deliveries.retry');
 
         // Thresholds
         Route::post('thresholds', [ThresholdController::class, 'store'])->name('thresholds.store');

@@ -74,7 +74,7 @@ class IntegrationController extends Controller
     public function test(Request $request, Team $current_team, Project $project, Integration $integration)
     {
         try {
-            app(IntegrationService::class)->send(
+            app(IntegrationService::class)->sendOrFail(
                 $integration,
                 '✅ Test Connection',
                 'This is a test notification from Tyto to verify your integration settings.'

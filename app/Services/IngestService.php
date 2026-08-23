@@ -88,10 +88,16 @@ class IngestService
                         ]
                     );
 
+                    $wasFailing = $heartbeat->status === 'failing';
+
                     $heartbeat->update([
                         'last_seen_at' => now(),
                         'status' => 'active',
                     ]);
+
+                    if ($wasFailing) {
+                        $this->alertService->notifyHeartbeatRecovered($heartbeat);
+                    }
                 }
 
                 $this->checkThresholds($project, $record);
