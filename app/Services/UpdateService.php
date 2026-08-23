@@ -16,13 +16,13 @@ class UpdateService
      *
      * @see config/cache.php
      */
-    public const CACHE_KEY = 'laraowl.update.latest';
+    public const CACHE_KEY = 'tyto.update.latest';
 
     /**
      * Held while a deferred check is pending, so a cold cache does not make
      * every incoming request queue up its own call to GitHub.
      */
-    public const LOCK_KEY = 'laraowl.update.checking';
+    public const LOCK_KEY = 'tyto.update.checking';
 
     /**
      * Get the release the instance should update to, if there is one.
@@ -80,13 +80,13 @@ class UpdateService
             $response = Http::withHeaders([
                 'Accept' => 'application/vnd.github+json',
                 'X-GitHub-Api-Version' => '2022-11-28',
-                'User-Agent' => 'LaraOwl/'.Version::current(),
+                'User-Agent' => 'Tyto/'.Version::current(),
             ])
-                ->timeout(config('laraowl.update_check.timeout'))
+                ->timeout(config('tyto.update_check.timeout'))
                 ->get("https://api.github.com/repos/{$this->repository()}/releases/latest");
 
             if ($response->failed()) {
-                Log::warning('LaraOwl update check failed.', [
+                Log::warning('Tyto update check failed.', [
                     'status' => $response->status(),
                 ]);
 
@@ -95,7 +95,7 @@ class UpdateService
 
             $release = Release::fromGitHub($response->json() ?? []);
         } catch (\Exception $e) {
-            Log::warning('LaraOwl update check failed: '.$e->getMessage());
+            Log::warning('Tyto update check failed: '.$e->getMessage());
 
             return null;
         }
@@ -103,7 +103,7 @@ class UpdateService
         Cache::put(
             self::CACHE_KEY,
             ['release' => $release?->toArray()],
-            (int) config('laraowl.update_check.cache_ttl'),
+            (int) config('tyto.update_check.cache_ttl'),
         );
 
         Cache::forget(self::LOCK_KEY);
@@ -124,7 +124,7 @@ class UpdateService
      */
     public function enabled(): bool
     {
-        return (bool) config('laraowl.update_check.enabled');
+        return (bool) config('tyto.update_check.enabled');
     }
 
     /**
@@ -132,7 +132,7 @@ class UpdateService
      */
     public function repository(): string
     {
-        return (string) config('laraowl.repository');
+        return (string) config('tyto.repository');
     }
 
     /**
