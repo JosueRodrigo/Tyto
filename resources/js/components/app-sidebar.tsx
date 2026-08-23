@@ -263,6 +263,11 @@ export function AppSidebar() {
                                 href: `/${teamSlug}/${projectSlug}/settings`,
                                 icon: Settings,
                             },
+                            {
+                                title: 'Status Page',
+                                href: `/${teamSlug}/${projectSlug}/status-page`,
+                                icon: Globe,
+                            },
                         ]}
                         label="Settings"
                     />
