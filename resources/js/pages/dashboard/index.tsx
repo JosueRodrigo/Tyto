@@ -110,10 +110,10 @@ export default function Dashboard(props: DashboardProps) {
     return (
         <>
             <Head title={`Overview · ${project?.name || 'Tyto'}`} />
-            <div className="space-y-6">
+            <div className="space-y-7">
                 <section className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-3xl">
-                        <div className="mb-3 flex flex-wrap items-center gap-2">
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
                             <Badge
                                 variant="outline"
                                 className={
@@ -135,15 +135,19 @@ export default function Dashboard(props: DashboardProps) {
                                 Window: {props.period}
                             </span>
                         </div>
-                        <h1 className="text-3xl font-black tracking-[-0.04em] text-foreground sm:text-4xl">
-                            Operational overview
+                        <p className="mb-2 text-[10px] font-black tracking-[0.2em] text-primary uppercase">
+                            Command center
+                        </p>
+                        <h1 className="text-3xl font-black tracking-[-0.055em] text-foreground sm:text-[2.75rem]">
+                            See the whole system.
                         </h1>
                         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                             Health, performance and incident signals for{' '}
                             <span className="font-bold text-foreground">
                                 {project?.name}
                             </span>
-                            . Data refreshes as telemetry arrives.
+                            . Understand what changed and act before users feel
+                            it.
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -194,7 +198,7 @@ export default function Dashboard(props: DashboardProps) {
                 </section>
 
                 {operationalHealth && (
-                    <section className="tyto-panel overflow-hidden">
+                    <section className="tyto-panel overflow-hidden ring-1 ring-primary/5">
                         <div className="flex flex-col justify-between gap-3 border-b border-border/70 p-5 sm:flex-row sm:items-center">
                             <div>
                                 <div className="flex items-center gap-2 font-extrabold text-foreground">
@@ -209,7 +213,7 @@ export default function Dashboard(props: DashboardProps) {
                                                   : 'bg-emerald-500'
                                         }`}
                                     />
-                                    Service health
+                                    System pulse
                                 </div>
                                 <p className="mt-1 text-xs text-muted-foreground">
                                     Current state across availability, recurring
