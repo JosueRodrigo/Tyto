@@ -216,7 +216,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                             size="lg"
                             asChild
-                            className="h-12 hover:bg-transparent"
+                            className="h-16 hover:bg-transparent"
                         >
                             <Link
                                 href={dashboardUrl}
