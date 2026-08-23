@@ -45,6 +45,8 @@ Route::prefix('{current_team}/{project}')
     ->group(function () {
         Route::get('dashboard', [RecordController::class, 'index'])->name('dashboard');
 
+        Route::get('telemetry', [RecordController::class, 'telemetry'])->name('telemetry');
+
         // Issues
         Route::get('issues', [IssueController::class, 'index'])->name('issues');
         Route::get('issues/{issue}', [IssueController::class, 'show'])->name('issues.show');

@@ -19,7 +19,7 @@ function githubRelease(string $tag): array
     return [
         'tag_name' => $tag,
         'name' => "LaraOwl {$tag}",
-        'html_url' => "https://github.com/laraowl/laraowl/releases/tag/{$tag}",
+        'html_url' => "https://github.com/JosueRodrigo/Tyto/releases/tag/{$tag}",
         'body' => 'Fixed the integrations URL bug.',
         'published_at' => '2026-07-09T12:00:00Z',
     ];
@@ -72,7 +72,7 @@ test('a release is newer only when it sorts above the running version', function
 
 test('refreshing caches the latest release from github', function () {
     Http::fake([
-        'api.github.com/repos/laraowl/laraowl/releases/latest' => Http::response(githubRelease('v99.0.0')),
+        'api.github.com/repos/JosueRodrigo/Tyto/releases/latest' => Http::response(githubRelease('v99.0.0')),
     ]);
 
     $release = app(UpdateService::class)->refresh();

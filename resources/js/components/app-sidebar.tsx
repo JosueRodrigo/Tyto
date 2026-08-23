@@ -19,6 +19,7 @@ import {
     Globe,
     Shield,
     Lock as LockIcon,
+    ScanSearch,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -231,6 +232,13 @@ export function AppSidebar() {
                                     `/${teamSlug}/${projectSlug}/issues`,
                                 ),
                                 icon: AlertCircle,
+                            },
+                            {
+                                title: 'Telemetry',
+                                href: withPeriod(
+                                    `/${teamSlug}/${projectSlug}/telemetry`,
+                                ),
+                                icon: ScanSearch,
                             },
                         ]}
                         label="Platform"
