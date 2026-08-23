@@ -122,7 +122,7 @@ services:
 
 
   redis:
-    image: bitnami/redis:latest
+    image: bitnami/redis:8.2.1
     platform: linux/amd64
     restart: always
     volumes:
