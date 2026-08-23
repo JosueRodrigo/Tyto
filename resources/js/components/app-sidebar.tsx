@@ -191,18 +191,14 @@ export function AppSidebar() {
     ];
 
     return (
-        <Sidebar
-            collapsible="icon"
-            variant="inset"
-            className="border-r border-sidebar-border bg-sidebar"
-        >
-            <SidebarHeader className="px-4 pt-4 pb-2">
+        <Sidebar collapsible="icon" variant="inset" className="bg-sidebar">
+            <SidebarHeader className="px-3 pt-4 pb-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
                             asChild
-                            className="hover:bg-transparent"
+                            className="h-12 hover:bg-transparent"
                         >
                             <Link
                                 href={dashboardUrl}
@@ -215,12 +211,12 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
 
-                <div className="mt-4 px-2">
+                <div className="mt-3 px-1">
                     <WorkspaceSwitcher />
                 </div>
             </SidebarHeader>
 
-            <SidebarContent className="px-2 pt-4">
+            <SidebarContent className="custom-scrollbar px-2 pt-3">
                 <div className="space-y-4">
                     <NavMain
                         items={[
@@ -259,7 +255,7 @@ export function AppSidebar() {
                 </div>
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-sidebar-border p-4">
+            <SidebarFooter className="border-t border-sidebar-border bg-black/5 p-3 dark:bg-black/10">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
