@@ -58,7 +58,7 @@ class UptimeController extends Controller
 
     private function checksSince(Project $project, CarbonInterface $start): Builder
     {
-        return $project->uptimeChecks()->where('checked_at', '>=', $start);
+        return $project->uptimeChecks()->getQuery()->where('checked_at', '>=', $start);
     }
 
     private function uptimePercentage(Builder $query): ?float
