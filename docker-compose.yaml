@@ -141,6 +141,26 @@ services:
     networks:
       - tyto-network
 
+  backup:
+    image: postgres:17-alpine
+    profiles: ["ops"]
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+      TYTO_BACKUP_DIR: /backups
+      TYTO_BACKUP_RETENTION_DAYS: ${TYTO_BACKUP_RETENTION_DAYS:-14}
+    entrypoint: ["/bin/sh", "/scripts/backup.sh"]
+    volumes:
+      - ./scripts:/scripts:ro
+      - backups:/backups:rw
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - tyto-network
+
 volumes:
   db-data:
   redis-data:
@@ -148,6 +168,7 @@ volumes:
   public:
   caddy_data:
   caddy_config:
+  backups:
 
 networks:
   tyto-network:
