@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AlertRule extends Model
 {
@@ -21,5 +22,10 @@ class AlertRule extends Model
     public function integrations()
     {
         return $this->belongsToMany(Integration::class, 'alert_rule_integration');
+    }
+
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(AlertDelivery::class);
     }
 }

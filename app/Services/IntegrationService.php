@@ -7,6 +7,8 @@ use App\Models\Issue;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
+use Throwable;
 
 class IntegrationService
 {
@@ -33,20 +35,31 @@ class IntegrationService
     /**
      * Send a generic notification to an integration.
      */
-    public function send(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
+    public function send(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): bool
+    {
+        try {
+            $this->sendOrFail($integration, $title, $message, $fields, $url);
+
+            return true;
+        } catch (Throwable $exception) {
+            Log::error('Integration failed: '.$integration->type.' - '.$exception->getMessage());
+
+            return false;
+        }
+    }
+
+    public function sendOrFail(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
     {
         try {
             $this->dispatchToDriver($integration, $title, $message, $fields, $url);
-
-            if ($integration->status !== 'healthy') {
-                $integration->update(['status' => 'healthy', 'last_error' => null]);
-            }
-        } catch (\Exception $e) {
-            Log::error('Integration failed: '.$integration->type.' - '.$e->getMessage());
+            $integration->update(['status' => 'healthy', 'last_error' => null]);
+        } catch (Throwable $exception) {
             $integration->update([
                 'status' => 'failing',
-                'last_error' => $e->getMessage(),
+                'last_error' => $exception->getMessage(),
             ]);
+
+            throw $exception;
         }
     }
 
@@ -61,7 +74,7 @@ class IntegrationService
             'telegram' => $this->sendToTelegram($integration, $title, $message, $fields, $url),
             'webhook' => $this->sendToWebhook($integration, $title, $message, $fields, $url),
             'email' => $this->sendToEmail($integration, $title, $message, $fields, $url),
-            default => null,
+            default => throw new RuntimeException("Unsupported integration type: {$integration->type}"),
         };
     }
 
@@ -69,7 +82,7 @@ class IntegrationService
     {
         $webhookUrl = $integration->data['webhook_url'] ?? null;
         if (! $webhookUrl) {
-            return;
+            throw new RuntimeException('Slack webhook URL is not configured.');
         }
 
         $slackFields = [];
@@ -113,14 +126,14 @@ class IntegrationService
             ];
         }
 
-        Http::post($webhookUrl, ['blocks' => $blocks]);
+        Http::post($webhookUrl, ['blocks' => $blocks])->throw();
     }
 
     protected function sendToDiscord(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
     {
         $webhookUrl = $integration->data['webhook_url'] ?? null;
         if (! $webhookUrl) {
-            return;
+            throw new RuntimeException('Discord webhook URL is not configured.');
         }
 
         $discordFields = [];
@@ -137,7 +150,7 @@ class IntegrationService
                 'fields' => $discordFields,
                 'timestamp' => now()->toIso8601String(),
             ]],
-        ]);
+        ])->throw();
     }
 
     protected function sendToTelegram(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
@@ -145,7 +158,7 @@ class IntegrationService
         $botToken = $integration->data['bot_token'] ?? null;
         $chatId = $integration->data['chat_id'] ?? null;
         if (! $botToken || ! $chatId) {
-            return;
+            throw new RuntimeException('Telegram bot token and chat ID are required.');
         }
 
         $text = "*{$title}*\n\n";
@@ -161,14 +174,14 @@ class IntegrationService
             'chat_id' => $chatId,
             'text' => $text,
             'parse_mode' => 'Markdown',
-        ]);
+        ])->throw();
     }
 
     protected function sendToWebhook(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
     {
         $webhookUrl = $integration->data['url'] ?? null;
         if (! $webhookUrl) {
-            return;
+            throw new RuntimeException('Webhook URL is not configured.');
         }
 
         Http::post($webhookUrl, [
@@ -178,14 +191,14 @@ class IntegrationService
             'fields' => $fields,
             'url' => $url,
             'timestamp' => now()->timestamp,
-        ]);
+        ])->throw();
     }
 
     protected function sendToEmail(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
     {
         $email = $integration->data['email'] ?? null;
         if (! $email) {
-            return;
+            throw new RuntimeException('Email recipient is not configured.');
         }
 
         $body = "{$title}\n\n";

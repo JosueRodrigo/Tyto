@@ -2,20 +2,15 @@
 
 namespace App\Services;
 
+use App\Jobs\SendAlertDelivery;
 use App\Models\AlertRule;
+use App\Models\Heartbeat;
 use App\Models\Issue;
 use App\Models\Project;
 use Illuminate\Support\Facades\Cache;
 
 class AlertService
 {
-    protected IntegrationService $integrationService;
-
-    public function __construct(IntegrationService $integrationService)
-    {
-        $this->integrationService = $integrationService;
-    }
-
     /**
      * Notify about a new issue (exception).
      */
@@ -117,6 +112,44 @@ class AlertService
         }
     }
 
+    public function notifyUptimeRecovered(Project $project): void
+    {
+        $rules = $project->alertRules()
+            ->where('event_type', 'uptime_down')
+            ->where('is_enabled', true)
+            ->with('integrations')
+            ->get();
+
+        foreach ($rules as $rule) {
+            $this->dispatchAlert(
+                $rule,
+                '✅ Uptime Recovered',
+                'The monitored endpoint is responding again.',
+                ['Project' => $project->name, 'URL' => $project->url, 'Status' => 'Recovered'],
+                $project->dashboardUrl(),
+            );
+        }
+    }
+
+    public function notifyHeartbeatRecovered(Heartbeat $heartbeat): void
+    {
+        $rules = $heartbeat->project->alertRules()
+            ->where('event_type', 'heartbeat_failed')
+            ->where('is_enabled', true)
+            ->with('integrations')
+            ->get();
+
+        foreach ($rules as $rule) {
+            $this->dispatchAlert(
+                $rule,
+                '✅ Heartbeat Recovered: '.$heartbeat->name,
+                "The heartbeat '{$heartbeat->name}' is checking in again.",
+                ['Project' => $heartbeat->project->name, 'Status' => 'Recovered'],
+                $heartbeat->project->dashboardUrl(),
+            );
+        }
+    }
+
     /**
      * Notify about an error spike.
      */
@@ -158,15 +191,29 @@ class AlertService
             return;
         }
 
-        if ($throttlePeriod > 0) {
-            Cache::put($lastSentKey, true, now()->addSeconds($throttlePeriod));
-        }
-
+        $queued = false;
         foreach ($rule->integrations as $integration) {
             if (! $integration->is_enabled) {
                 continue;
             }
-            $this->integrationService->send($integration, $title, $message, $fields, $url);
+
+            $delivery = $rule->project->alertDeliveries()->create([
+                'alert_rule_id' => $rule->id,
+                'integration_id' => $integration->id,
+                'event_type' => $rule->event_type,
+                'title' => $title,
+                'message' => $message,
+                'fields' => $fields,
+                'url' => $url,
+                'status' => 'pending',
+            ]);
+
+            SendAlertDelivery::dispatch($delivery->id);
+            $queued = true;
+        }
+
+        if ($queued && $throttlePeriod > 0) {
+            Cache::put($lastSentKey, true, now()->addSeconds($throttlePeriod));
         }
     }
 }
