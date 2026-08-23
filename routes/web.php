@@ -7,6 +7,7 @@ use App\Http\Controllers\Projects\IssueController;
 use App\Http\Controllers\Projects\ProjectController;
 use App\Http\Controllers\Projects\RecordController;
 use App\Http\Controllers\Projects\ThresholdController;
+use App\Http\Controllers\Projects\UptimeController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureProjectExists;
@@ -76,7 +77,7 @@ Route::prefix('{current_team}/{project}')
         Route::get('notifications', [RecordController::class, 'index'])->name('notifications');
         Route::get('notifications/channels/{hash}', [RecordController::class, 'showNotificationDetails'])->name('notifications.show');
 
-        Route::get('uptime', [RecordController::class, 'index'])->name('uptime');
+        Route::get('uptime', [UptimeController::class, 'index'])->name('uptime');
 
         Route::get('mail', [RecordController::class, 'index'])->name('mail');
         Route::get('mail/mailables/{hash}', [RecordController::class, 'showMailDetails'])->name('mail.show');
