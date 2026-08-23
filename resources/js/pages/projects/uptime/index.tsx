@@ -1,273 +1,359 @@
-﻿import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { formatDistanceToNow } from 'date-fns';
 import {
-    Activity as ActivityIcon,
-    Clock,
-    Globe,
-    CheckCircle2,
-    Timer,
-    History,
-    RefreshCw,
+    Activity,
+    CircleAlert,
+    Clock3,
+    ExternalLink,
+    Gauge,
+    Globe2,
+    Settings2,
+    ShieldCheck,
 } from 'lucide-react';
-import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
+import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
+import { MetricCard } from '@/components/observability/metric-card';
+import { Pagination } from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { useLiveReload } from '@/hooks/use-live-reload';
 import AppLayout from '@/layouts/app-layout';
 
-export default function UptimeIndex({ checks, uptime_stats, period }: any) {
+const availability = (value: number | null) =>
+    value === null ? '—' : `${value.toFixed(value % 1 ? 2 : 0)}%`;
+const latency = (value: number | null) =>
+    value === null ? '—' : `${value.toLocaleString()} ms`;
+
+export default function UptimeIndex({
+    monitor,
+    summary,
+    chart,
+    checks,
+    period,
+}: any) {
     const { props }: any = usePage();
-    const currentProject = props.current_project || props.currentProject;
+    const team = props.currentTeam || props.current_team;
+    const project = props.currentProject || props.current_project;
+    const baseUrl = `/${team?.slug}/${project?.slug}`;
 
-    useLiveReload(currentProject?.id);
+    useLiveReload(project?.id);
 
-    if (currentProject && !currentProject.uptime_monitoring_enabled) {
-        return (
-            <>
-                <Head title={`Uptime - ${currentProject?.name}`} />
-
-                <Card className="border-border bg-card p-12 shadow-2xl">
-                    <div className="flex flex-col items-center justify-center gap-4 text-center">
-                        <Globe className="size-12 text-muted-foreground/30" />
-                        <div className="text-2xl font-black tracking-tighter text-foreground">
-                            Uptime Monitoring Disabled
-                        </div>
-                        <p className="max-w-md text-[10px] font-black tracking-widest text-muted-foreground uppercase opacity-50">
-                            Enable it under the project's general settings to
-                            start checking availability again.
-                        </p>
-                    </div>
-                </Card>
-            </>
+    const selectPeriod = (nextPeriod: string) =>
+        router.get(
+            `${baseUrl}/uptime`,
+            { period: nextPeriod },
+            { preserveScroll: true, preserveState: true, replace: true },
         );
-    }
 
     return (
         <>
-            <Head title={`Uptime - ${currentProject?.name}`} />
-
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <Card className="group relative overflow-hidden border-border bg-card p-8 shadow-2xl">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 transition-opacity group-hover:opacity-10">
-                        <CheckCircle2 className="size-24 text-emerald-500" />
-                    </div>
-                    <div className="mb-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase opacity-50">
-                        Availability
-                    </div>
-                    <div className="mb-2 text-4xl font-black tracking-tighter text-foreground">
-                        {uptime_stats.uptime_percentage}%
+            <Head title={`Uptime · ${project?.name}`} />
+            <div className="space-y-6">
+                <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+                    <div>
+                        <div className="mb-2 flex items-center gap-2 text-xs font-extrabold tracking-[0.12em] text-primary uppercase">
+                            <Globe2 className="size-4" /> Uptime center
+                        </div>
+                        <h1 className="text-3xl font-black tracking-[-0.04em] text-foreground">
+                            Availability at a glance
+                        </h1>
+                        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                            Track endpoint health, latency and every
+                            availability check from one operational view.
+                        </p>
                     </div>
                     <div className="flex items-center gap-2">
+                        {monitor.url && (
+                            <Button variant="outline" asChild>
+                                <a
+                                    href={monitor.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    Open endpoint{' '}
+                                    <ExternalLink className="size-4" />
+                                </a>
+                            </Button>
+                        )}
+                        <Button variant="outline" asChild>
+                            <Link href={`${baseUrl}/settings`}>
+                                <Settings2 className="size-4" /> Configure
+                            </Link>
+                        </Button>
+                    </div>
+                </section>
+
+                <section className="tyto-panel flex flex-col justify-between gap-4 p-5 md:flex-row md:items-center">
+                    <div className="flex items-center gap-4">
                         <div
-                            className={`size-2 rounded-full ${uptime_stats.uptime_percentage > 99 ? 'animate-pulse bg-emerald-500' : 'bg-orange-500'}`}
-                        ></div>
-                        <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                            System Operational
-                        </span>
+                            className={`flex size-11 items-center justify-center rounded-xl ${monitor.status === 'up' ? 'bg-emerald-500/10 text-emerald-600' : monitor.status === 'down' ? 'bg-red-500/10 text-red-600' : 'bg-muted text-muted-foreground'}`}
+                        >
+                            {monitor.status === 'down' ? (
+                                <CircleAlert className="size-5" />
+                            ) : (
+                                <ShieldCheck className="size-5" />
+                            )}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-foreground">
+                                    {monitor.status === 'up'
+                                        ? 'Operational'
+                                        : monitor.status === 'down'
+                                          ? 'Endpoint down'
+                                          : 'Awaiting first check'}
+                                </span>
+                                <Badge variant="outline">
+                                    {monitor.enabled
+                                        ? 'Monitoring on'
+                                        : 'Monitoring off'}
+                                </Badge>
+                            </div>
+                            <p className="mt-1 text-xs break-all text-muted-foreground">
+                                {monitor.url || 'No endpoint configured'} ·
+                                every {monitor.interval || 60} minutes
+                            </p>
+                        </div>
                     </div>
-                </Card>
+                    <div className="text-xs text-muted-foreground md:text-right">
+                        <div className="font-semibold text-foreground">
+                            Last check
+                        </div>
+                        {monitor.last_checked_at
+                            ? formatDistanceToNow(
+                                  new Date(monitor.last_checked_at),
+                                  { addSuffix: true },
+                              )
+                            : 'Not checked yet'}
+                    </div>
+                </section>
 
-                <Card className="group relative overflow-hidden border-border bg-card p-8 shadow-2xl">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 transition-opacity group-hover:opacity-10">
-                        <Timer className="size-24 text-blue-500" />
-                    </div>
-                    <div className="mb-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase opacity-50">
-                        Avg Response Time
-                    </div>
-                    <div className="mb-2 text-4xl font-black tracking-tighter text-foreground">
-                        {Math.round(uptime_stats.avg_response_time)}ms
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Clock className="size-3 text-muted-foreground/50" />
-                        <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                            Last {period}
-                        </span>
-                    </div>
-                </Card>
+                {!monitor.enabled && (
+                    <section className="rounded-xl border border-amber-500/25 bg-amber-500/[0.06] p-4 text-sm text-amber-800 dark:text-amber-200">
+                        Monitoring is paused. Existing history remains
+                        available; enable uptime checks in project settings to
+                        resume collection.
+                    </section>
+                )}
 
-                <Card className="group relative overflow-hidden border-border bg-card p-8 shadow-2xl">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 transition-opacity group-hover:opacity-10">
-                        <RefreshCw className="size-24 text-primary" />
-                    </div>
-                    <div className="mb-2 text-[10px] font-black tracking-widest text-muted-foreground uppercase opacity-50">
-                        Last Check
-                    </div>
-                    <div className="mb-2 text-xl font-black tracking-tight text-foreground">
-                        {uptime_stats.last_check
-                            ? new Date(
-                                  uptime_stats.last_check.checked_at,
-                              ).toLocaleTimeString()
-                            : 'Never'}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Globe className="size-3 text-muted-foreground/50" />
-                        <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                            Global Node
-                        </span>
-                    </div>
-                </Card>
-            </div>
+                <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <MetricCard
+                        label="Uptime · 24h"
+                        value={availability(summary.uptime_24h)}
+                        detail="Availability in the last day"
+                        icon={ShieldCheck}
+                        tone={
+                            summary.uptime_24h !== null &&
+                            summary.uptime_24h < 99
+                                ? 'critical'
+                                : 'healthy'
+                        }
+                    />
+                    <MetricCard
+                        label="Uptime · 7d"
+                        value={availability(summary.uptime_7d)}
+                        detail="Rolling seven-day window"
+                        icon={Globe2}
+                        tone={
+                            summary.uptime_7d !== null && summary.uptime_7d < 99
+                                ? 'critical'
+                                : 'healthy'
+                        }
+                    />
+                    <MetricCard
+                        label="Average latency"
+                        value={latency(summary.average_response_time)}
+                        detail={`Across ${summary.total_checks} checks`}
+                        icon={Activity}
+                        tone="neutral"
+                    />
+                    <MetricCard
+                        label="P95 latency"
+                        value={latency(summary.p95_response_time)}
+                        detail={`${summary.down_checks} failed checks`}
+                        icon={Gauge}
+                        tone={summary.down_checks > 0 ? 'critical' : 'neutral'}
+                    />
+                </section>
 
-            {/* History Chart */}
-            <Card className="overflow-hidden border-border bg-card shadow-2xl">
-                <div className="border-b border-border/50 p-8">
-                    <div className="flex items-center gap-2 text-xs font-black tracking-widest text-foreground uppercase">
-                        <ActivityIcon className="size-3.5 text-muted-foreground" />
-                        Response Time History
+                <section className="tyto-panel overflow-hidden">
+                    <div className="flex flex-col justify-between gap-3 border-b border-border/70 p-5 sm:flex-row sm:items-center">
+                        <div>
+                            <h2 className="font-bold text-foreground">
+                                Response time
+                            </h2>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Up to 300 recent samples in the selected window.
+                            </p>
+                        </div>
+                        <div className="flex rounded-lg border border-border bg-muted/30 p-1">
+                            {['24h', '7d'].map((option) => (
+                                <Button
+                                    key={option}
+                                    size="sm"
+                                    variant={
+                                        period === option
+                                            ? 'secondary'
+                                            : 'ghost'
+                                    }
+                                    onClick={() => selectPeriod(option)}
+                                >
+                                    {option}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
-                </div>
-                <CardContent className="p-8">
-                    <div className="h-[250px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={checks.data.slice().reverse()}>
-                                <defs>
-                                    <linearGradient
-                                        id="colorResponse"
-                                        x1="0"
-                                        y1="0"
-                                        x2="0"
-                                        y2="1"
-                                    >
-                                        <stop
-                                            offset="5%"
-                                            stopColor="#3b82f6"
-                                            stopOpacity={0.1}
-                                        />
-                                        <stop
-                                            offset="95%"
-                                            stopColor="#3b82f6"
-                                            stopOpacity={0}
-                                        />
-                                    </linearGradient>
-                                </defs>
-                                <Tooltip
-                                    content={({ active, payload }) => {
-                                        if (
-                                            active &&
-                                            payload &&
-                                            payload.length
-                                        ) {
-                                            return (
-                                                <div className="rounded-lg border border-border bg-background/95 p-2 shadow-xl backdrop-blur-sm">
-                                                    <div className="mb-1.5 border-b border-border/50 pb-1 text-[9px] font-bold tracking-tight text-muted-foreground uppercase">
-                                                        {new Date(
-                                                            payload[0].payload
-                                                                .checked_at,
-                                                        ).toLocaleString()}
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                                        <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                                                            Response:
-                                                        </span>
-                                                        <span className="text-[10px] font-bold text-foreground">
-                                                            {payload[0].value}ms
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
+                    {chart.length ? (
+                        <div className="h-72 p-5">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chart}>
+                                    <defs>
+                                        <linearGradient
+                                            id="uptimeLatency"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="hsl(var(--primary))"
+                                                stopOpacity={0.25}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="hsl(var(--primary))"
+                                                stopOpacity={0}
+                                            />
+                                        </linearGradient>
+                                    </defs>
+                                    <YAxis hide domain={[0, 'auto']} />
+                                    <Tooltip
+                                        labelFormatter={(_, payload) =>
+                                            payload?.[0]
+                                                ? new Date(
+                                                      payload[0].payload
+                                                          .checked_at,
+                                                  ).toLocaleString()
+                                                : ''
                                         }
-
-                                        return null;
-                                    }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="response_time"
-                                    stroke="#3b82f6"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorResponse)"
-                                    isAnimationActive={true}
-                                    name="Response Time (ms)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Detailed Checks Table */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 px-2 text-xs font-black tracking-widest text-foreground uppercase">
-                    <History className="size-3.5 text-muted-foreground" />
-                    Check History
-                </div>
-
-                <Card className="overflow-hidden border-border bg-card shadow-2xl">
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse text-left">
-                            <thead>
-                                <tr className="border-b border-border/50 bg-muted/30">
-                                    <th className="px-6 py-4 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-4 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                                        Response Time
-                                    </th>
-                                    <th className="px-6 py-4 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                                        Status Code
-                                    </th>
-                                    <th className="px-6 py-4 text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                                        Checked At
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border/50">
-                                {checks.data.map((check: any) => (
-                                    <tr
-                                        key={check.id}
-                                        className="group transition-colors hover:bg-muted/30"
-                                    >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                {check.status === 'up' ? (
-                                                    <Badge className="border-emerald-500/20 bg-emerald-500/10 text-[9px] font-black tracking-widest text-emerald-500 uppercase">
-                                                        UP
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge className="border-red-500/20 bg-red-500/10 text-[9px] font-black tracking-widest text-red-500 uppercase">
-                                                        DOWN
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-sm font-black text-foreground">
-                                                {check.response_time}ms
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-xs font-bold text-muted-foreground">
-                                                {check.status_code || '—'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-xs font-medium text-muted-foreground/60">
-                                            {new Date(
-                                                check.checked_at,
-                                            ).toLocaleString()}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {checks.links && checks.links.length > 3 && (
-                        <div className="flex justify-end gap-2 border-t border-border/50 p-6">
-                            {/* Pagination could go here */}
+                                        formatter={(value) => [
+                                            `${value ?? 0} ms`,
+                                            'Latency',
+                                        ]}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="response_time"
+                                        connectNulls
+                                        stroke="hsl(var(--primary))"
+                                        strokeWidth={2}
+                                        fill="url(#uptimeLatency)"
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <div className="flex h-56 flex-col items-center justify-center text-center">
+                            <Activity className="mb-3 size-8 text-muted-foreground/40" />
+                            <div className="font-semibold text-foreground">
+                                No uptime samples yet
+                            </div>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                The chart will populate after the first endpoint
+                                check.
+                            </p>
                         </div>
                     )}
-                </Card>
+                </section>
+
+                <section className="tyto-panel overflow-hidden">
+                    <div className="border-b border-border/70 p-5">
+                        <h2 className="font-bold text-foreground">
+                            Check history
+                        </h2>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Latest probe results, scoped to this project.
+                        </p>
+                    </div>
+                    {checks.data.length ? (
+                        <>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader className="bg-muted/40">
+                                        <TableRow>
+                                            <TableHead className="pl-5">
+                                                Status
+                                            </TableHead>
+                                            <TableHead>Response</TableHead>
+                                            <TableHead>HTTP</TableHead>
+                                            <TableHead className="hidden lg:table-cell">
+                                                Error
+                                            </TableHead>
+                                            <TableHead className="pr-5 text-right">
+                                                Checked
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {checks.data.map((check: any) => (
+                                            <TableRow key={check.id}>
+                                                <TableCell className="pl-5">
+                                                    <Badge
+                                                        className={
+                                                            check.status ===
+                                                            'up'
+                                                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                                                : 'bg-red-500/10 text-red-700 dark:text-red-300'
+                                                        }
+                                                    >
+                                                        {check.status.toUpperCase()}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="font-mono text-xs">
+                                                    {latency(
+                                                        check.response_time,
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="font-mono text-xs">
+                                                    {check.status_code || '—'}
+                                                </TableCell>
+                                                <TableCell className="hidden max-w-xs truncate text-xs text-muted-foreground lg:table-cell">
+                                                    {check.error || '—'}
+                                                </TableCell>
+                                                <TableCell className="pr-5 text-right text-xs text-muted-foreground">
+                                                    <span className="inline-flex items-center gap-1.5">
+                                                        <Clock3 className="size-3.5" />
+                                                        {new Date(
+                                                            check.checked_at,
+                                                        ).toLocaleString()}
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                            <Pagination links={checks.links} meta={checks} />
+                        </>
+                    ) : (
+                        <div className="p-10 text-center text-sm text-muted-foreground">
+                            No checks recorded for this project.
+                        </div>
+                    )}
+                </section>
             </div>
         </>
     );
 }
 
-UptimeIndex.layout = (page: any) => {
-    return (
-        <AppLayout
-            children={page}
-            breadcrumbs={[{ title: 'Uptime Monitoring', href: '#' }]}
-        />
-    );
-};
+UptimeIndex.layout = (page: React.ReactNode) => (
+    <AppLayout breadcrumbs={[{ title: 'Uptime', href: '#' }]}>{page}</AppLayout>
+);
