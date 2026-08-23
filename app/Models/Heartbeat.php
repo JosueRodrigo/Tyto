@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface;
 
 class Heartbeat extends Model
 {
@@ -37,7 +37,7 @@ class Heartbeat extends Model
         return $this->nextExpectedAt()?->isPast() ?? true;
     }
 
-    public function nextExpectedAt(): ?Carbon
+    public function nextExpectedAt(): ?CarbonInterface
     {
         return $this->last_seen_at?->copy()->addMinutes($this->interval_minutes + 1);
     }

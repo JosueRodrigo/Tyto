@@ -52,9 +52,11 @@ class IssueService
         $driver = DB::connection()->getDriverName();
 
         $resolutionRate = $total > 0 ? round(($resolved / $total) * 100, 1) : 0;
-        $avgResolutionExpression = $driver === 'pgsql'
-            ? 'AVG(EXTRACT(EPOCH FROM (resolved_at - created_at))) as avg_time'
-            : 'AVG(TIMESTAMPDIFF(SECOND, created_at, resolved_at)) as avg_time';
+        $avgResolutionExpression = match ($driver) {
+            'pgsql' => 'AVG(EXTRACT(EPOCH FROM (resolved_at - created_at))) as avg_time',
+            'sqlite' => 'AVG((JULIANDAY(resolved_at) - JULIANDAY(created_at)) * 86400) as avg_time',
+            default => 'AVG(TIMESTAMPDIFF(SECOND, created_at, resolved_at)) as avg_time',
+        };
 
         $avgResolutionTime = $project->issues()
             ->whereNotNull('resolved_at')
