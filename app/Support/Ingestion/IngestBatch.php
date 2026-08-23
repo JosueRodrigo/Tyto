@@ -22,7 +22,7 @@ final readonly class IngestBatch
     {
         $candidate = array_key_exists('records', $payload) ? $payload['records'] : $payload;
 
-        if (! is_array($candidate) || $candidate === []) {
+        if (!is_array($candidate) || $candidate === []) {
             throw new InvalidArgumentException('At least one record is required.');
         }
 
@@ -33,11 +33,11 @@ final readonly class IngestBatch
         }
 
         foreach ($records as $index => $record) {
-            if (! is_array($record)) {
+            if (!is_array($record)) {
                 throw new InvalidArgumentException("Record {$index} must be an object.");
             }
 
-            if (! is_string($record['t'] ?? null) || trim($record['t']) === '') {
+            if (!is_string($record['t'] ?? null) || trim($record['t']) === '') {
                 throw new InvalidArgumentException("Record {$index} must contain a non-empty string type in `t`.");
             }
         }
