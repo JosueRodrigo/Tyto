@@ -10,6 +10,7 @@ use App\Services\IssueService;
 use App\Support\ExceptionTrace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -63,7 +64,11 @@ class IssueController extends Controller
         $validated = $request->validate([
             'status' => 'sometimes|string|in:open,resolved,ignored',
             'priority' => 'sometimes|string|in:none,low,medium,high,critical',
-            'assigned_to' => 'sometimes|nullable|exists:users,id',
+            'assigned_to' => [
+                'sometimes',
+                'nullable',
+                Rule::exists('team_members', 'user_id')->where('team_id', $current_team->id),
+            ],
         ]);
 
         $this->issueService->updateIssue($issue, $validated);
@@ -76,7 +81,7 @@ class IssueController extends Controller
      */
     public function comment(Request $request, Team $current_team, Project $project, Issue $issue): RedirectResponse
     {
-        $validated = $request->validate(['comment' => 'required|string']);
+        $validated = $request->validate(['comment' => 'required|string|max:5000']);
 
         $this->issueService->addComment($issue, $validated['comment']);
 
