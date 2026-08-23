@@ -5,7 +5,7 @@ namespace App\Support;
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
- * A published LaraOwl release, as reported by the GitHub releases API.
+ * A published Tyto release, as reported by the GitHub releases API.
  *
  * @implements Arrayable<string, string|null>
  */
