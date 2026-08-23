@@ -42,7 +42,7 @@ class IngestController extends Controller
         $receiptKey = 'tyto:ingest-receipt:'.$project->getKey().':'.hash('sha256', $ingestId);
         $receiptTtl = (int) config('tyto.ingestion.idempotency_ttl');
 
-        if (!Cache::add($receiptKey, true, $receiptTtl)) {
+        if (! Cache::add($receiptKey, true, $receiptTtl)) {
             return response()->json([
                 'message' => 'Ingestion request already accepted.',
                 'ingest_id' => $ingestId,
@@ -51,7 +51,7 @@ class IngestController extends Controller
         }
 
         // Auto-update project URL if not set
-        if ($request->has('app_url') && !$project->url) {
+        if ($request->has('app_url') && ! $project->url) {
             $project->update(['url' => $request->input('app_url')]);
         }
 

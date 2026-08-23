@@ -25,6 +25,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -40,11 +42,19 @@ jobs:
 
       - run: composer validate --strict --no-check-lock
       - run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Check PHP style on changed files
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}...HEAD" -- '*.php')
+          if (( ${#files[@]} )); then
+            vendor/bin/pint --test "${files[@]}"
+          fi
       - run: cp .env.example .env
       - run: php artisan key:generate
       - run: touch database/database.sqlite
       - run: php artisan migrate:fresh --force
-      - run: composer test
+      - run: php artisan test
 
   frontend:
     name: Frontend

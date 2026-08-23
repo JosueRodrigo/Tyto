@@ -11,7 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class ProtectTytoIngestion
 {
-    public function __construct(private readonly RateLimiter $limiter) {}
+    public function __construct(private readonly RateLimiter $limiter)
+    {
+    }
 
     /**
      * @param  Closure(Request): Response  $next
