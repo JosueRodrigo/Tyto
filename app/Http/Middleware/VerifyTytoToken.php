@@ -16,9 +16,7 @@ class VerifyTytoToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->header('X-Tyto-Token')
-            ?? $request->header('X-Laraowl-Token')
-            ?? $request->bearerToken();
+        $token = $request->header('X-Tyto-Token') ?? $request->bearerToken();
 
         if (! $token) {
             abort(401, 'API Token is missing.');

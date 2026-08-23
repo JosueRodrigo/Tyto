@@ -34,8 +34,8 @@
             }
         </style>
 
-        <link rel="icon" type="image/png" href="/logo.png">
-        <link rel="apple-touch-icon" href="/logo.png">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <meta name="theme-color" content="#050510">
 
 
 

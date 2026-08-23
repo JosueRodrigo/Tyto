@@ -26,8 +26,6 @@ class InviteTeamMemberCommand extends Command
                             {--accept : Immediately join an existing user to the team instead of waiting for the invite email to be accepted}
                             {--no-notify : Skip sending the invitation email}';
 
-    protected $aliases = ['laraowl:teams:invite'];
-
     protected $description = 'Invite a user to a team, mirroring the team settings "invite" web flow';
 
     public function handle(InviteMember $inviteMember, AcceptTeamInvitation $acceptTeamInvitation): int

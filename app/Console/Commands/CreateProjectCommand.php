@@ -17,8 +17,6 @@ class CreateProjectCommand extends Command
                             {--url= : The project URL, used for uptime checks}
                             {--email= : Default alert email (defaults to the team owner\'s email)}';
 
-    protected $aliases = ['laraowl:projects:create'];
-
     protected $description = 'Create a project (application) with its default alert rules, mirroring the "New project" web flow';
 
     public function handle(CreateProject $createProject): int

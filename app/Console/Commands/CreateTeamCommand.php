@@ -17,8 +17,6 @@ class CreateTeamCommand extends Command
                             {owner : Owner user ID or email}
                             {--personal : Mark the team as the owner\'s personal team}';
 
-    protected $aliases = ['laraowl:teams:create'];
-
     protected $description = 'Create a team and assign an owner, mirroring the "New team" web flow';
 
     public function handle(CreateTeam $createTeam): int

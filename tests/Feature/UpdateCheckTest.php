@@ -157,9 +157,8 @@ test('a payload cached by an older version is discarded and re-fetched', functio
         'api.github.com/*' => Http::response(githubRelease('v99.0.0')),
     ]);
 
-    // What an older LaraOwl installation left behind: a serialized Release,
-    // which this cache
-    // hands back as an incomplete class rather than a usable object.
+    // A serialized payload from an older installation can be returned by the
+    // cache as an incomplete class rather than a usable object.
     $legacy = throughCacheSerialization(new Release('1.0.7', 'v1.0.7', 'https://example.com/107'));
     Cache::put(UpdateService::CACHE_KEY, ['release' => $legacy], 3600);
 

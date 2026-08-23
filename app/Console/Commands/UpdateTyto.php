@@ -14,8 +14,6 @@ class UpdateTyto extends Command
                             {--dry-run : Print the steps that would run without executing them}
                             {--force : Skip the confirmation prompt and the working tree check}';
 
-    protected $aliases = ['laraowl:update'];
-
     protected $description = 'Check for and install the latest Tyto release';
 
     /**

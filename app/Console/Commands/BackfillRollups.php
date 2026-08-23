@@ -24,8 +24,6 @@ class BackfillRollups extends Command
                             {--until= : Only rebuild buckets before this datetime}
                             {--chunk=2000 : Raw records read per batch}';
 
-    protected $aliases = ['laraowl:rollups:backfill'];
-
     protected $description = 'Rebuild the dashboard rollups from raw records';
 
     protected const UPDATE_BATCH = 500;

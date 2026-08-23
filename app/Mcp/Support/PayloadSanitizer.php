@@ -15,8 +15,8 @@ class PayloadSanitizer
     public static function sanitize(array $payload): array
     {
         /** @var array<int, string> $keys */
-        $keys = config('tyto-mcp.redaction.keys', config('laraowl-mcp.redaction.keys', []));
-        $maxLength = (int) config('tyto-mcp.redaction.max_length', config('laraowl-mcp.redaction.max_length', 2000));
+        $keys = config('tyto-mcp.redaction.keys', []);
+        $maxLength = (int) config('tyto-mcp.redaction.max_length', 2000);
 
         return self::walk($payload, $keys, $maxLength);
     }
