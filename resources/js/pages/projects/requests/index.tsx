@@ -553,7 +553,7 @@ export default function RequestsIndex({
                             <div className="p-12">
                                 <EmptyState
                                     title="No Requests Tracked"
-                                    description="We haven't captured any requests for this project yet. Make sure your application is sending data to Laraowl."
+                                    description="We haven't captured any requests for this project yet. Make sure your application is sending data to Tyto."
                                     icon={Activity}
                                 />
                             </div>
