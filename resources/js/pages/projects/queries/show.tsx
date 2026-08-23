@@ -71,7 +71,7 @@ export default function QueryDetails({
                                     variant="outline"
                                     className="border-border bg-muted text-[10px] font-bold text-muted-foreground uppercase"
                                 >
-                                    DATABASE: {meta?.database || 'laraowl'}
+                                    DATABASE: {meta?.database || 'application'}
                                 </Badge>
                             </div>
                         </div>
