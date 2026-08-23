@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Projects;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ use Inertia\Response;
 
 class StatusPageController extends Controller
 {
-    public function edit(Project $project): Response
+    public function edit(Team $current_team, Project $project): Response
     {
         return Inertia::render('projects/status-page/edit', [
             'statusPage' => [
@@ -29,7 +30,7 @@ class StatusPageController extends Controller
         ]);
     }
 
-    public function update(Request $request, Project $project): RedirectResponse
+    public function update(Request $request, Team $current_team, Project $project): RedirectResponse
     {
         $validated = $request->validate([
             'enabled' => ['required', 'boolean'],
