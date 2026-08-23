@@ -38,3 +38,24 @@ The readiness endpoint requires the operational diagnostics PR and reports HTTP 
 4. Repeat the verification commands above.
 
 Never use `migrate:rollback` automatically in production; application and database rollback compatibility must be assessed per release.
+
+## Backup and restore
+
+Create and verify a database backup:
+
+```bash
+docker compose --profile ops run --rm backup
+```
+
+Backups are stored in the `backups` volume with a SHA-256 checksum and pruned after
+`TYTO_BACKUP_RETENTION_DAYS`. Copy this volume to encrypted off-site storage.
+
+Restore only during a maintenance window, with workers stopped:
+
+```bash
+docker compose stop app horizon schedule-worker reverb
+docker compose --profile ops run --rm --entrypoint /scripts/restore.sh \
+  -e TYTO_ALLOW_RESTORE=true backup /scripts/restore.sh /backups/tyto-TIMESTAMP.sql.gz
+docker compose up -d
+php artisan tyto:doctor
+```
