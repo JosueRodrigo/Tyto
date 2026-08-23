@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Heartbeat extends Model
 {
@@ -33,6 +34,20 @@ class Heartbeat extends Model
             return true;
         }
 
-        return $this->last_seen_at->addMinutes($this->interval_minutes + 1)->isPast();
+        return $this->nextExpectedAt()?->isPast() ?? true;
+    }
+
+    public function nextExpectedAt(): ?Carbon
+    {
+        return $this->last_seen_at?->copy()->addMinutes($this->interval_minutes + 1);
+    }
+
+    public function effectiveStatus(): string
+    {
+        if ($this->status === 'inactive') {
+            return 'inactive';
+        }
+
+        return $this->isFailing() ? 'failing' : 'active';
     }
 }

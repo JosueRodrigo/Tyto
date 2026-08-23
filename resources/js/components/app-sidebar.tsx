@@ -17,6 +17,7 @@ import {
     FileText,
     Settings,
     Globe,
+    HeartPulse,
     Shield,
     Lock as LockIcon,
     ScanSearch,
@@ -147,6 +148,11 @@ export function AppSidebar() {
                   },
               ]
             : []),
+        {
+            title: 'Heartbeats',
+            href: withPeriod(`/${teamSlug}/${projectSlug}/heartbeats`),
+            icon: HeartPulse,
+        },
         {
             title: 'Logs',
             href: withPeriod(`/${teamSlug}/${projectSlug}/logs`),

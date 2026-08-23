@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Projects\AlertRuleController;
 use App\Http\Controllers\Projects\FirewallController;
+use App\Http\Controllers\Projects\HeartbeatController;
 use App\Http\Controllers\Projects\IntegrationController;
 use App\Http\Controllers\Projects\IssueController;
 use App\Http\Controllers\Projects\ProjectController;
@@ -78,6 +79,7 @@ Route::prefix('{current_team}/{project}')
         Route::get('notifications/channels/{hash}', [RecordController::class, 'showNotificationDetails'])->name('notifications.show');
 
         Route::get('uptime', [UptimeController::class, 'index'])->name('uptime');
+        Route::get('heartbeats', [HeartbeatController::class, 'index'])->name('heartbeats');
 
         Route::get('mail', [RecordController::class, 'index'])->name('mail');
         Route::get('mail/mailables/{hash}', [RecordController::class, 'showMailDetails'])->name('mail.show');
