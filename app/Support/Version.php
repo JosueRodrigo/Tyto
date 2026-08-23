@@ -5,7 +5,7 @@ namespace App\Support;
 class Version
 {
     /**
-     * The version this instance of LaraOwl is running.
+     * The version this instance of Tyto is running.
      *
      * Bumped by hand on each tagged release — mirrors how
      * Illuminate\Foundation\Application::VERSION is maintained, instead of
@@ -16,7 +16,7 @@ class Version
     const CURRENT = '1.1.1';
 
     /**
-     * Get the version this instance of LaraOwl is running.
+     * Get the version this instance of Tyto is running.
      */
     public static function current(): string
     {
