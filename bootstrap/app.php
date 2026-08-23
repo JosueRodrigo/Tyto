@@ -3,6 +3,7 @@
 use App\Http\Middleware\CheckOnboarding;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\ProtectTytoIngestion;
 use App\Http\Middleware\SetTeamUrlDefaults;
 use App\Http\Middleware\VerifyLaraowlToken;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'tyto.token' => VerifyLaraowlToken::class,
+            'tyto.ingestion' => ProtectTytoIngestion::class,
             'laraowl.token' => VerifyLaraowlToken::class,
         ]);
 

@@ -21,18 +21,12 @@ class ProcessIngestedRecords implements ShouldQueue
      */
     public $tries = 3;
 
-    protected $project;
-
-    protected $records;
-
     /**
      * Create a new job instance.
+     *
+     * @param  list<array<string, mixed>>  $records
      */
-    public function __construct(Project $project, array $records)
-    {
-        $this->project = $project;
-        $this->records = $records;
-    }
+    public function __construct(public Project $project, public array $records) {}
 
     /**
      * Execute the job.
