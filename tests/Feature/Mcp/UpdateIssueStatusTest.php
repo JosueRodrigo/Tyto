@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use App\Mcp\Tools\UpdateIssueStatus;
 use App\Models\Issue;
 use App\Models\IssueActivity;
@@ -12,7 +12,7 @@ it('updates status and logs an attributed activity', function () {
     $project = Project::factory()->for($user->currentTeam)->create();
     $issue = Issue::create(['project_id' => $project->id, 'hash' => 'h', 'type' => 'exception', 'title' => 'Bug', 'status' => 'open', 'last_seen_at' => now(), 'message' => '']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(UpdateIssueStatus::class, ['issue' => $issue->id, 'status' => 'resolved'])
         ->assertOk();
 
@@ -31,7 +31,7 @@ it('cannot update an issue outside the user\'s teams', function () {
     $project = Project::factory()->for($other->currentTeam)->create();
     $issue = Issue::create(['project_id' => $project->id, 'hash' => 'h', 'type' => 'exception', 'title' => 'Bug', 'status' => 'open', 'last_seen_at' => now(), 'message' => '']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(UpdateIssueStatus::class, ['issue' => $issue->id, 'status' => 'resolved'])
         ->assertHasErrors();
 

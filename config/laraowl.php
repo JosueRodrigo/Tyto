@@ -1,5 +1,7 @@
 <?php
 
+// Legacy configuration bridge. New installations should configure config/tyto.php
+// and TYTO_* environment variables instead.
 return [
 
     /*
@@ -12,15 +14,15 @@ return [
     |
     */
 
-    'repository' => env('LARAOWL_REPOSITORY', 'laraowl/laraowl'),
+    'repository' => env('LARAOWL_REPOSITORY', env('TYTO_REPOSITORY', 'JosueRodrigo/Tyto')),
 
     /*
     |--------------------------------------------------------------------------
     | Update Checks
     |--------------------------------------------------------------------------
     |
-    | LaraOwl periodically asks the GitHub releases API whether a newer version
-    | has been published, and shows a banner to team owners when there is one.
+    | Legacy update settings kept so upgraded installations can migrate without
+    | losing their environment configuration.
     | Disable this to stop the instance from making outbound requests.
     |
     */
@@ -36,7 +38,7 @@ return [
     | Update Binaries
     |--------------------------------------------------------------------------
     |
-    | Executables the `laraowl:update` command shells out to. Override these
+    | Executables the legacy command alias shells out to. Override these
     | when they are not resolvable on the PATH of the user running the update,
     | for example "/usr/local/bin/composer".
     |

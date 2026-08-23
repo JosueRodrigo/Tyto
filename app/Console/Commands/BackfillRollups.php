@@ -17,12 +17,14 @@ use Illuminate\Support\Facades\DB;
 
 class BackfillRollups extends Command
 {
-    protected $signature = 'laraowl:rollups:backfill
+    protected $signature = 'tyto:rollups:backfill
                             {--project= : Restrict the rebuild to one project id or slug}
                             {--missing : Only rebuild projects that have records but no rollups yet}
                             {--since= : Only rebuild buckets at or after this datetime}
                             {--until= : Only rebuild buckets before this datetime}
                             {--chunk=2000 : Raw records read per batch}';
+
+    protected $aliases = ['laraowl:rollups:backfill'];
 
     protected $description = 'Rebuild the dashboard rollups from raw records';
 

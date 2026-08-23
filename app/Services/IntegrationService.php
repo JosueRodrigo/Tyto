@@ -172,7 +172,7 @@ class IntegrationService
         }
 
         Http::post($webhookUrl, [
-            'event' => 'laraowl.alert',
+            'event' => 'tyto.alert',
             'title' => $title,
             'message' => $message,
             'fields' => $fields,

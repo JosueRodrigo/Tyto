@@ -1,11 +1,11 @@
-name: laraowl
+name: tyto
 services:
 
   app:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    image: laraowl:${APP_VERSION:-latest}
+    image: tyto:${APP_VERSION:-latest}
     restart: unless-stopped
     depends_on:
       db:
@@ -15,13 +15,13 @@ services:
     env_file:
       - .env
     networks:
-      - laraowl-network
+      - tyto-network
     volumes:
       - storage:/usr/share/caddy/html/storage:rw
       - public:/usr/share/caddy/html/public:rw
 
   horizon:
-    image: laraowl:${APP_VERSION:-latest}
+    image: tyto:${APP_VERSION:-latest}
     restart: unless-stopped
     command: php artisan horizon
     environment:
@@ -34,13 +34,13 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - laraowl-network
+      - tyto-network
     volumes:
       - storage:/usr/share/caddy/html/storage:rw
       - public:/usr/share/caddy/html/public:rw
 
   schedule-worker:
-    image: laraowl:${APP_VERSION:-latest}
+    image: tyto:${APP_VERSION:-latest}
     restart: unless-stopped
     command: php artisan schedule:work
     environment:
@@ -53,13 +53,13 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - laraowl-network
+      - tyto-network
     volumes:
       - storage:/usr/share/caddy/html/storage:rw
       - public:/usr/share/caddy/html/public:rw
 
   reverb:
-    image: laraowl:${APP_VERSION:-latest}
+    image: tyto:${APP_VERSION:-latest}
     restart: unless-stopped
     command: php artisan reverb:start
     environment:
@@ -74,7 +74,7 @@ services:
       horizon:
         condition: service_started
     networks:
-      - laraowl-network
+      - tyto-network
 
   caddy:
     image: caddy:2-alpine
@@ -99,7 +99,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - laraowl-network
+      - tyto-network
 
   db:
     image: postgres:17-alpine
@@ -118,7 +118,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - laraowl-network
+      - tyto-network
 
 
   redis:
@@ -139,7 +139,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - laraowl-network
+      - tyto-network
 
 volumes:
   db-data:
@@ -150,5 +150,5 @@ volumes:
   caddy_config:
 
 networks:
-  laraowl-network:
+  tyto-network:
     driver: bridge

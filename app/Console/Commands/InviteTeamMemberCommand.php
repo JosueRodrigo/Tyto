@@ -18,13 +18,15 @@ class InviteTeamMemberCommand extends Command
 {
     use ResolvesConsoleIdentifiers;
 
-    protected $signature = 'laraowl:teams:invite
+    protected $signature = 'tyto:teams:invite
                             {team : Team ID or slug}
                             {email : Email address to invite}
                             {--role=member : Role to assign (member or admin)}
                             {--by= : Inviter user ID or email (defaults to the team owner)}
                             {--accept : Immediately join an existing user to the team instead of waiting for the invite email to be accepted}
                             {--no-notify : Skip sending the invitation email}';
+
+    protected $aliases = ['laraowl:teams:invite'];
 
     protected $description = 'Invite a user to a team, mirroring the team settings "invite" web flow';
 

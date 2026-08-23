@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="art/banner.png" alt="LaraOwl Banner" width="100%">
+  <img src="art/banner.png" alt="Tyto Banner" width="100%">
 </p>
 
 <p align="center">
@@ -7,11 +7,11 @@
 </p>
 
 <p align="center">
-  <a href="https://laraowl.mintlify.site"><img src="https://img.shields.io/badge/Docs-laraowl-F59E0B?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Documentation"></a>
+  <a href="https://github.com/JosueRodrigo/Tyto"><img src="https://img.shields.io/badge/Docs-tyto-F59E0B?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Documentation"></a>
 </p>
 
 <p align="center">
-  <a href="https://laraowl.mintlify.site"><b>Documentation</b></a> •
+  <a href="https://github.com/JosueRodrigo/Tyto"><b>Documentation</b></a> •
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#client-integration">Client Integration</a> •
@@ -23,17 +23,17 @@
 
 ---
 
-## Why LaraOwl?
+## Why Tyto?
 
-LaraOwl is a **open-source, self-hosted** monitoring platform built specifically for Laravel applications. Unlike SaaS alternatives, you deploy it on your own infrastructure — your data never leaves your servers.
+Tyto is a **open-source, self-hosted** monitoring platform built specifically for Laravel applications. Unlike SaaS alternatives, you deploy it on your own infrastructure — your data never leaves your servers.
 
-Drop in a single Composer package on any Laravel app, point it at your LaraOwl server, and instantly get real-time dashboards for requests, exceptions, queries, jobs, and more.
+Drop in a single Composer package on any Laravel app, point it at your Tyto server, and instantly get real-time dashboards for requests, exceptions, queries, jobs, and more.
 
 
 ## Screenshots
 
 <p align="center">
-  <img src="art/screenshots/dashboard.png" alt="LaraOwl Dashboard" width="100%">
+  <img src="art/screenshots/dashboard.png" alt="Tyto Dashboard" width="100%">
 </p>
 
 ---
@@ -152,11 +152,11 @@ Set custom performance budgets per project:
 
 # Quick Start
 
-> For the full guide — installation, configuration, and troubleshooting — see the **[LaraOwl Documentation](https://laraowl.mintlify.site)**.
+> For the full guide — installation, configuration, and troubleshooting — see the **[Tyto Documentation](https://github.com/JosueRodrigo/Tyto)**.
 
 ## Server Installation
 
-Choose one of the following methods to install the LaraOwl server:
+Choose one of the following methods to install the Tyto server:
 
 ### Docker
 
@@ -209,7 +209,7 @@ And then create a admin user.
 
 ```
 App\Models\User::updateOrCreate(
-    ['email' => 'admin@laraowl.com'],
+    ['email' => 'admin@tyto.local'],
     ['name' => 'Admin', 'password' => bcrypt('changeme')]
 );
 ```
@@ -225,8 +225,8 @@ App\Models\User::updateOrCreate(
 - A queue worker
 
 ```bash
-composer create-project laraowl/laraowl laraowl
-cd laraowl
+composer create-project tyto/tyto tyto
+cd tyto
 ```
 Once the files are ready, complete the setup:
 
@@ -250,7 +250,7 @@ php artisan serve
 
 ### Required Background Processes
 
-LaraOwl needs these processes running alongside the web server:
+Tyto needs these processes running alongside the web server:
 
 ```bash
 # Process queued records (required)
@@ -272,7 +272,7 @@ php artisan schedule:work
 In the Laravel application you want to monitor:
 
 ```bash
-composer require laraowl/client
+composer require tyto/agent
 ```
 
 ### 2. Configure
@@ -280,44 +280,44 @@ composer require laraowl/client
 Run the interactive setup command:
 
 ```bash
-php artisan laraowl:install
+php artisan tyto:install
 ```
 
 Or manually add to your `.env`:
 
 ```env
-LARAOWL_SERVER_URL=https://your-laraowl-server.com
-LARAOWL_TOKEN=your_project_api_token
+TYTO_SERVER_URL=https://your-tyto-server.com
+TYTO_TOKEN=your_project_api_token
 ```
 
-You can find the API token in **Project Settings → API Keys** within the LaraOwl dashboard.
+You can find the API token in **Project Settings → API Keys** within the Tyto dashboard.
 
 ### 3. Optional: Send Logs
 
-To forward application logs to LaraOwl:
+To forward application logs to Tyto:
 
 ```env
-LOG_STACK=stack,laraowl
+LOG_STACK=stack,tyto
 ```
 
-That's it. Your application will immediately begin sending telemetry data to the LaraOwl server.
+That's it. Your application will immediately begin sending telemetry data to the Tyto server.
 
 ---
 
 ## Connect an AI Agent (MCP)
 
-LaraOwl exposes a [Model Context Protocol](https://modelcontextprotocol.io) server so AI coding agents can read projects, triage issues and query telemetry on your behalf. Every tool is scoped to your teams.
+Tyto exposes a [Model Context Protocol](https://modelcontextprotocol.io) server so AI coding agents can read projects, triage issues and query telemetry on your behalf. Every tool is scoped to your teams.
 
 Generate a token from **Settings → MCP Tokens**, or via Artisan:
 
 ```bash
-php artisan laraowl:mcp-token user@example.com --name=mcp
+php artisan tyto:mcp-token user@example.com --name=mcp
 ```
 
 Then point your agent at the server. For Claude Code:
 
 ```bash
-claude mcp add --transport http laraowl https://your-laraowl-server.com/mcp \
+claude mcp add --transport http tyto https://your-tyto-server.com/mcp \
   --header "Authorization: Bearer <token>"
 ```
 
@@ -329,10 +329,10 @@ Available tools: `list-projects`, `list-issues`, `get-issue`, `query-telemetry`,
 
 ```
 ┌──────────────────┐         HTTPS POST          ┌──────────────────────┐
-│  Your Laravel    │  ──────────────────────────▶ │  LaraOwl Server      │
+│  Your Laravel    │  ──────────────────────────▶ │  Tyto Server      │
 │  Application     │     /api/ingest              │                      │
 │                  │     (API Token Auth)         │  ┌────────────────┐  │
-│  laraowl/client  │                              │  │ IngestController│  │
+│  tyto/agent  │                              │  │ IngestController│  │
 │  package         │                              │  └───────┬────────┘  │
 └──────────────────┘                              │          │           │
                                                   │    Queue Dispatch    │
@@ -383,8 +383,8 @@ APP_URL=https://your-domain.com
 # Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_DATABASE=laraowl
-DB_USERNAME=laraowl
+DB_DATABASE=tyto
+DB_USERNAME=tyto
 DB_PASSWORD=your-secure-password
 
 # Queue (use Redis for best performance)
@@ -404,23 +404,23 @@ REVERB_SCHEME=https
 Example Supervisor configuration for the queue worker:
 
 ```ini
-[program:laraowl-queue]
+[program:tyto-queue]
 process_name=%(program_name)s_%(process_num)02d
-command=php /path/to/laraowl/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+command=php /path/to/tyto/artisan queue:work --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
 numprocs=2
 redirect_stderr=true
-stdout_logfile=/var/log/laraowl/queue.log
+stdout_logfile=/var/log/tyto/queue.log
 
-[program:laraowl-reverb]
-command=php /path/to/laraowl/artisan reverb:start
+[program:tyto-reverb]
+command=php /path/to/tyto/artisan reverb:start
 autostart=true
 autorestart=true
 redirect_stderr=true
-stdout_logfile=/var/log/laraowl/reverb.log
+stdout_logfile=/var/log/tyto/reverb.log
 ```
 
 ### Scheduler (Cron)
@@ -428,7 +428,7 @@ stdout_logfile=/var/log/laraowl/reverb.log
 Add to your server's crontab:
 
 ```
-* * * * * cd /path/to/laraowl && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /path/to/tyto && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 This handles:
@@ -467,4 +467,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-LaraOwl is open-source software licensed under the [Apache License 2.0](LICENSE).
+Tyto is open-source software licensed under the [Apache License 2.0](LICENSE).
