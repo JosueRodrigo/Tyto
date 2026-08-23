@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'repository' => env('TYTO_REPOSITORY', env('LARAOWL_REPOSITORY', 'JosueRodrigo/laraowl')),
+    'repository' => env('TYTO_REPOSITORY', env('LARAOWL_REPOSITORY', 'JosueRodrigo/Tyto')),
 
     'update_check' => [
         'enabled' => env('TYTO_UPDATE_CHECK', env('LARAOWL_UPDATE_CHECK', true)),
