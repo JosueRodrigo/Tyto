@@ -160,7 +160,7 @@ Choose one of the following methods to install the Tyto server:
 
 ### Docker
 
-This project comes with a custom `Dockerfile` and `docker-compose.yml` for easy deployment. To get started:
+This project comes with a custom `Dockerfile` and `docker-compose.yaml` for easy deployment. To get started:
 
 
 #### Changes in `.env` for docker configuration:
@@ -168,7 +168,7 @@ This project comes with a custom `Dockerfile` and `docker-compose.yml` for easy 
 First copy the production environment file:
 
 ```bash
-cp .env.prod .env
+cp .env.prod.example .env
 ```
 
 Then update the following variables in `.env`:
@@ -189,6 +189,8 @@ Use the following command to start the server in production mode:
 ```bash
 docker compose up -d --build
 ```
+
+For upgrades, health verification, backups, and rollback guidance, use the [production checklist](docs/production-checklist.md).
 
 The server will be available at `https://your-production-domain.com`. Make sure your DNS resolves for `ws.your-production-domain.com` and `your-production-domain.com`. Caddy will automatically fetch and renew SSL certificates for your domain.  
 
