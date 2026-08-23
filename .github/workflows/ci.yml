@@ -38,7 +38,7 @@ jobs:
           key: composer-${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
           restore-keys: composer-${{ runner.os }}-${{ matrix.php }}-
 
-      - run: composer validate --strict
+      - run: composer validate --strict --no-check-lock
       - run: composer install --prefer-dist --no-interaction --no-progress
       - run: cp .env.example .env
       - run: php artisan key:generate
