@@ -10,7 +10,15 @@ import {
     Settings2,
     ShieldCheck,
 } from 'lucide-react';
-import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
+import {
+    Area,
+    AreaChart,
+    CartesianGrid,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 import { MetricCard } from '@/components/observability/metric-card';
 import { Pagination } from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
@@ -223,19 +231,76 @@ export default function UptimeIndex({
                                             y2="1"
                                         >
                                             <stop
-                                                offset="5%"
-                                                stopColor="hsl(var(--primary))"
-                                                stopOpacity={0.25}
+                                                offset="0%"
+                                                stopColor="var(--chart-1)"
+                                                stopOpacity={0.42}
                                             />
                                             <stop
-                                                offset="95%"
-                                                stopColor="hsl(var(--primary))"
-                                                stopOpacity={0}
+                                                offset="100%"
+                                                stopColor="var(--chart-1)"
+                                                stopOpacity={0.02}
                                             />
                                         </linearGradient>
                                     </defs>
-                                    <YAxis hide domain={[0, 'auto']} />
+                                    <CartesianGrid
+                                        vertical={false}
+                                        stroke="var(--border)"
+                                        opacity={0.55}
+                                        strokeDasharray="4 6"
+                                    />
+                                    <XAxis
+                                        dataKey="checked_at"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{
+                                            fill: 'var(--muted-foreground)',
+                                            fontSize: 10,
+                                        }}
+                                        minTickGap={48}
+                                        tickFormatter={(value) =>
+                                            new Date(value).toLocaleTimeString(
+                                                [],
+                                                {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                },
+                                            )
+                                        }
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{
+                                            fill: 'var(--muted-foreground)',
+                                            fontSize: 10,
+                                        }}
+                                        tickFormatter={(value) => `${value}ms`}
+                                        width={52}
+                                        domain={[0, 'auto']}
+                                    />
                                     <Tooltip
+                                        cursor={{
+                                            stroke: 'var(--chart-1)',
+                                            strokeOpacity: 0.28,
+                                            strokeDasharray: '4 4',
+                                        }}
+                                        contentStyle={{
+                                            borderRadius: 12,
+                                            border: '1px solid var(--border)',
+                                            background: 'var(--popover)',
+                                            color: 'var(--popover-foreground)',
+                                            boxShadow:
+                                                '0 18px 45px rgba(5, 5, 16, 0.35)',
+                                            fontSize: 12,
+                                        }}
+                                        labelStyle={{
+                                            color: 'var(--muted-foreground)',
+                                            marginBottom: 4,
+                                        }}
+                                        itemStyle={{
+                                            color: 'var(--chart-1)',
+                                            fontWeight: 700,
+                                        }}
                                         labelFormatter={(_, payload) =>
                                             payload?.[0]
                                                 ? new Date(
@@ -253,9 +318,25 @@ export default function UptimeIndex({
                                         type="monotone"
                                         dataKey="response_time"
                                         connectNulls
-                                        stroke="hsl(var(--primary))"
-                                        strokeWidth={2}
+                                        stroke="var(--chart-1)"
+                                        strokeWidth={3}
                                         fill="url(#uptimeLatency)"
+                                        dot={
+                                            chart.length <= 48
+                                                ? {
+                                                      r: 3,
+                                                      fill: 'var(--chart-1)',
+                                                      stroke: 'var(--card)',
+                                                      strokeWidth: 2,
+                                                  }
+                                                : false
+                                        }
+                                        activeDot={{
+                                            r: 5,
+                                            fill: 'var(--chart-1)',
+                                            stroke: 'var(--card)',
+                                            strokeWidth: 3,
+                                        }}
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
