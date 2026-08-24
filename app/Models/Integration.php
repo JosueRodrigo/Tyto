@@ -18,9 +18,46 @@ class Integration extends Model
     ];
 
     protected $casts = [
-        'data' => 'array',
+        'data' => 'encrypted:array',
         'is_enabled' => 'boolean',
     ];
+
+    public function configurationForDisplay(): array
+    {
+        $configuration = $this->data ?? [];
+
+        foreach ($this->secretFields() as $field) {
+            if (filled($configuration[$field] ?? null)) {
+                $configuration[$field] = '';
+            }
+        }
+
+        return $configuration;
+    }
+
+    public function mergeConfiguration(array $configuration): array
+    {
+        $current = $this->data ?? [];
+
+        foreach ($this->secretFields() as $field) {
+            if (blank($configuration[$field] ?? null) && filled($current[$field] ?? null)) {
+                $configuration[$field] = $current[$field];
+            }
+        }
+
+        return $configuration;
+    }
+
+    public function secretFields(): array
+    {
+        return match ($this->type) {
+            'slack', 'discord' => ['webhook_url'],
+            'telegram' => ['bot_token'],
+            'webhook' => ['url'],
+            'email' => ['smtp_password'],
+            default => [],
+        };
+    }
 
     public function project()
     {
