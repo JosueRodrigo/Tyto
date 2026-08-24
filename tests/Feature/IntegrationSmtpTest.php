@@ -51,8 +51,7 @@ test('email integrations build and use their own smtp transport', function () {
     $manager = Mockery::mock(MailManager::class);
     $manager->shouldReceive('build')
         ->once()
-        ->with(Mockery::on(fn (array $configuration) =>
-            $configuration['transport'] === 'smtp'
+        ->with(Mockery::on(fn (array $configuration) => $configuration['transport'] === 'smtp'
             && $configuration['host'] === 'smtp.example.com'
             && $configuration['port'] === 587
             && $configuration['username'] === 'mailer@example.com'
