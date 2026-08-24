@@ -7,6 +7,7 @@ use App\Services\IntegrationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -66,7 +67,7 @@ class SendAlertDelivery implements ShouldQueue
         } catch (Throwable $exception) {
             $delivery->update([
                 'status' => 'pending',
-                'last_error' => $exception->getMessage(),
+                'last_error' => $this->safeErrorMessage($delivery, $exception),
             ]);
 
             throw $exception;
@@ -75,9 +76,33 @@ class SendAlertDelivery implements ShouldQueue
 
     public function failed(Throwable $exception): void
     {
-        AlertDelivery::query()->whereKey($this->deliveryId)->update([
+        $delivery = AlertDelivery::query()->with('integration')->find($this->deliveryId);
+
+        $delivery?->update([
             'status' => 'failed',
-            'last_error' => $exception->getMessage(),
+            'last_error' => $delivery
+                ? $this->safeErrorMessage($delivery, $exception)
+                : Str::limit($exception->getMessage(), 1000),
         ]);
+    }
+
+    private function safeErrorMessage(AlertDelivery $delivery, Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+        $integration = $delivery->integration;
+
+        if (! $integration) {
+            return Str::limit($message, 1000);
+        }
+
+        foreach ($integration->secretFields() as $field) {
+            $secret = $integration->data[$field] ?? null;
+
+            if (is_string($secret) && $secret !== '') {
+                $message = str_replace($secret, '[redacted]', $message);
+            }
+        }
+
+        return Str::limit($message, 1000);
     }
 }
