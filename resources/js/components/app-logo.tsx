@@ -10,11 +10,11 @@ export default function AppLogo() {
             <div className="flex aspect-square size-14 shrink-0 items-center justify-center rounded-[18px] bg-primary/12 shadow-[0_0_36px_rgba(159,85,255,0.28)] ring-1 ring-primary/40 transition-all duration-300 group-hover:scale-[1.04] group-hover:bg-primary/16 group-hover:shadow-[0_0_44px_rgba(159,85,255,0.36)]">
                 <AppLogoIcon className="size-12! drop-shadow-[0_0_12px_rgba(159,85,255,0.5)]" />
             </div>
-            <div className="flex flex-col leading-tight">
+            <div className="min-w-0 flex-1 leading-tight">
                 <span className="text-xl font-black tracking-[-0.04em] text-sidebar-foreground">
                     {name}
                 </span>
-                <span className="mt-0.5 text-[10px] font-bold tracking-[0.2em] text-sidebar-foreground/50 uppercase">
+                <span className="mt-0.5 block text-[9px] font-bold tracking-[0.16em] whitespace-nowrap text-sidebar-foreground/50 uppercase">
                     See · Understand · Act
                 </span>
             </div>

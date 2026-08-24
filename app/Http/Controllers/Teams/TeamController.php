@@ -63,6 +63,7 @@ class TeamController extends Controller
                 'name' => $team->name,
                 'slug' => $team->slug,
                 'isPersonal' => $team->is_personal,
+                'logoUrl' => $team->logo_url,
             ],
             'members' => $team->members()->get()->map(fn ($member) => [
                 'id' => $member->id,
@@ -101,6 +102,11 @@ class TeamController extends Controller
 
             return $team;
         });
+
+        if ($request->hasFile('logo')) {
+            $team->clearMediaCollection('logo');
+            $team->addMediaFromRequest('logo')->toMediaCollection('logo');
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Team updated.')]);
 

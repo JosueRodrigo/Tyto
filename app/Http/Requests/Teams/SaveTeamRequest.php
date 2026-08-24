@@ -25,6 +25,7 @@ class SaveTeamRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', new TeamName],
+            'logo' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }

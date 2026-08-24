@@ -1,5 +1,12 @@
 import { Form, Head, router } from '@inertiajs/react';
-import { ChevronDown, Mail, UserPlus, X } from 'lucide-react';
+import {
+    Building2,
+    ChevronDown,
+    Mail,
+    Upload,
+    UserPlus,
+    X,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import CancelInvitationModal from '@/components/cancel-invitation-modal';
 import DeleteTeamModal from '@/components/delete-team-modal';
@@ -51,6 +58,7 @@ export default function TeamEdit({
     availableRoles,
 }: Props) {
     const getInitials = useInitials();
+    const [teamLogoPreview, setTeamLogoPreview] = useState(team.logoUrl ?? '');
 
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -106,10 +114,64 @@ export default function TeamEdit({
 
                             <Form
                                 {...update.form(team.slug)}
+                                method="post"
+                                encType="multipart/form-data"
                                 className="space-y-6"
                             >
                                 {({ errors, processing }) => (
                                     <>
+                                        <input
+                                            type="hidden"
+                                            name="_method"
+                                            value="PATCH"
+                                        />
+                                        <div className="flex flex-col gap-6 rounded-2xl border border-border bg-card/50 p-5 sm:flex-row sm:items-center">
+                                            <Avatar className="size-20 rounded-2xl">
+                                                {teamLogoPreview && (
+                                                    <AvatarImage
+                                                        src={teamLogoPreview}
+                                                        alt={team.name}
+                                                        className="object-cover"
+                                                    />
+                                                )}
+                                                <AvatarFallback className="rounded-2xl">
+                                                    <Building2 className="size-8" />
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="min-w-0 flex-1 space-y-2">
+                                                <Label htmlFor="team-logo">
+                                                    Team logo
+                                                </Label>
+                                                <Input
+                                                    id="team-logo"
+                                                    name="logo"
+                                                    type="file"
+                                                    accept="image/png,image/jpeg,image/webp"
+                                                    className="cursor-pointer"
+                                                    onChange={(event) => {
+                                                        const file =
+                                                            event.target
+                                                                .files?.[0];
+
+                                                        if (file) {
+                                                            setTeamLogoPreview(
+                                                                URL.createObjectURL(
+                                                                    file,
+                                                                ),
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+                                                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                    <Upload className="size-3.5" />
+                                                    PNG, JPG or WebP up to 2 MB.
+                                                </p>
+                                                <InputError
+                                                    message={errors.logo}
+                                                />
+                                            </div>
+                                        </div>
+
                                         <div className="grid gap-2">
                                             <Label htmlFor="name">
                                                 Team name
