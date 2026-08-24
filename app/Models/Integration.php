@@ -53,7 +53,7 @@ class Integration extends Model
         return match ($this->type) {
             'slack', 'discord' => ['webhook_url'],
             'telegram' => ['bot_token'],
-            'webhook' => ['url'],
+            'webhook' => ['url', 'signing_secret'],
             'email' => ['smtp_password'],
             default => [],
         };
