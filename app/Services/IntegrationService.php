@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Integration;
 use App\Models\Issue;
+use Illuminate\Mail\MailManager;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -12,6 +13,8 @@ use Throwable;
 
 class IntegrationService
 {
+    public function __construct(private readonly MailManager $mail) {}
+
     /**
      * Send notification for a specific issue to all enabled integrations.
      */
@@ -210,8 +213,42 @@ class IntegrationService
             $body .= "View details: {$url}";
         }
 
-        Mail::raw($body, function ($m) use ($email, $title) {
-            $m->to($email)->subject($title);
+        $configuration = $integration->data ?? [];
+        $host = $configuration['smtp_host'] ?? null;
+
+        if (! $host) {
+            Mail::raw($body, function ($m) use ($email, $title) {
+                $m->to($email)->subject($title);
+            });
+
+            return;
+        }
+
+        $scheme = match ($configuration['smtp_encryption'] ?? 'tls') {
+            'ssl' => 'smtps',
+            'none' => 'smtp',
+            default => 'smtp',
+        };
+
+        $mailer = $this->mail->build([
+            'transport' => 'smtp',
+            'scheme' => $scheme,
+            'host' => $host,
+            'port' => (int) ($configuration['smtp_port'] ?? 587),
+            'username' => $configuration['smtp_username'] ?? null,
+            'password' => $configuration['smtp_password'] ?? null,
+            'timeout' => 10,
+        ]);
+
+        $fromAddress = $configuration['from_address'] ?? null;
+        $fromName = $configuration['from_name'] ?? config('app.name');
+
+        $mailer->raw($body, function ($message) use ($email, $title, $fromAddress, $fromName) {
+            $message->to($email)->subject($title);
+
+            if ($fromAddress) {
+                $message->from($fromAddress, $fromName);
+            }
         });
     }
 
@@ -252,6 +289,13 @@ class IntegrationService
                 'name' => 'Email',
                 'fields' => [
                     ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'placeholder' => 'ops@example.com'],
+                    ['name' => 'smtp_host', 'label' => 'SMTP Host', 'type' => 'text', 'placeholder' => 'smtp.example.com'],
+                    ['name' => 'smtp_port', 'label' => 'SMTP Port', 'type' => 'number', 'placeholder' => '587'],
+                    ['name' => 'smtp_encryption', 'label' => 'Encryption', 'type' => 'select', 'options' => [['value' => 'tls', 'label' => 'TLS'], ['value' => 'ssl', 'label' => 'SSL'], ['value' => 'none', 'label' => 'None']],
+                    ['name' => 'smtp_username', 'label' => 'SMTP Username', 'type' => 'text', 'placeholder' => 'mailer@example.com'],
+                    ['name' => 'smtp_password', 'label' => 'SMTP Password', 'type' => 'password', 'placeholder' => 'Leave blank to keep the saved password'],
+                    ['name' => 'from_address', 'label' => 'From Address', 'type' => 'email', 'placeholder' => 'alerts@example.com'],
+                    ['name' => 'from_name', 'label' => 'From Name', 'type' => 'text', 'placeholder' => 'Tyto Alerts'],
                 ],
             ],
         ];
