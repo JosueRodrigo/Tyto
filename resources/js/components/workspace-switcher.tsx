@@ -118,7 +118,8 @@ export function WorkspaceSwitcher({
                                 title={currentProject?.name}
                                 className="truncate text-[10px] font-medium tracking-tight text-foreground/60"
                             >
-                                {currentProject?.name ?? t('workspace.noProject')}
+                                {currentProject?.name ??
+                                    t('workspace.noProject')}
                             </span>
                         </div>
                     </div>
