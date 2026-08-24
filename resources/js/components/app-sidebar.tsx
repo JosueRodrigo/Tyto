@@ -263,11 +263,20 @@ export function AppSidebar() {
                         label={t('nav.platform')}
                     />
 
-                    <NavMain items={activityNavItems} label={t('nav.activity')} />
+                    <NavMain
+                        items={activityNavItems}
+                        label={t('nav.activity')}
+                    />
 
-                    <NavMain items={securityNavItems} label={t('nav.security')} />
+                    <NavMain
+                        items={securityNavItems}
+                        label={t('nav.security')}
+                    />
 
-                    <NavMain items={monitoringNavItems} label={t('nav.monitoring')} />
+                    <NavMain
+                        items={monitoringNavItems}
+                        label={t('nav.monitoring')}
+                    />
 
                     <NavMain
                         items={[
