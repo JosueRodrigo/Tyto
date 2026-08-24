@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 export type Locale = 'en' | 'pt-BR' | 'es';
 
 const LOCALE_COOKIE = 'locale';
-const LOCALE_EVENT = 'tyto:locale-change';
+export const LOCALE_EVENT = 'tyto:locale-change';
 
 const messages = {
     en: {
@@ -130,7 +130,7 @@ const messages = {
 
 export type TranslationKey = keyof (typeof messages)['en'];
 
-const storedLocale = (): Locale => {
+export const storedLocale = (): Locale => {
     if (typeof document === 'undefined') {
         return 'en';
     }
