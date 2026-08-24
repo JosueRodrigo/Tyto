@@ -6,6 +6,7 @@ export function useLiveReload(
     intervalMs = 15000,
 ): void {
     const lastReloadAt = useRef(0);
+    const isNavigating = useRef(false);
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {

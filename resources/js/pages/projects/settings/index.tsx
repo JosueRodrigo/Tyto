@@ -1238,6 +1238,11 @@ export default function ProjectSettings({
                                                                                                   .auth
                                                                                                   .user
                                                                                                   .email,
+                                                                                              smtp_port: 587,
+                                                                                              smtp_encryption:
+                                                                                                  'tls',
+                                                                                              from_name:
+                                                                                                  'Tyto Alerts',
                                                                                           }
                                                                                         : {},
                                                                             },
@@ -1443,31 +1448,86 @@ export default function ProjectSettings({
                                                     className="space-y-2"
                                                 >
                                                     <Label>{field.label}</Label>
-                                                    <Input
-                                                        type={field.type}
-                                                        value={
-                                                            intForm.data.data[
-                                                                field.name
-                                                            ] || ''
-                                                        }
-                                                        onChange={(e) =>
-                                                            intForm.setData(
-                                                                'data',
-                                                                {
-                                                                    ...intForm
-                                                                        .data
-                                                                        .data,
-                                                                    [field.name]:
-                                                                        e.target
-                                                                            .value,
-                                                                },
-                                                            )
-                                                        }
-                                                        placeholder={
-                                                            field.placeholder
-                                                        }
-                                                        className="border-border bg-muted"
-                                                    />
+                                                    {field.type === 'select' ? (
+                                                        <Select
+                                                            value={
+                                                                intForm.data
+                                                                    .data[
+                                                                    field.name
+                                                                ] || ''
+                                                            }
+                                                            onValueChange={(
+                                                                value,
+                                                            ) =>
+                                                                intForm.setData(
+                                                                    'data',
+                                                                    {
+                                                                        ...intForm
+                                                                            .data
+                                                                            .data,
+                                                                        [field.name]:
+                                                                            value,
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger className="border-border bg-muted">
+                                                                <SelectValue
+                                                                    placeholder={
+                                                                        field.placeholder
+                                                                    }
+                                                                />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {field.options?.map(
+                                                                    (
+                                                                        option: any,
+                                                                    ) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                option.value
+                                                                            }
+                                                                            value={
+                                                                                option.value
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                option.label
+                                                                            }
+                                                                        </SelectItem>
+                                                                    ),
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    ) : (
+                                                        <Input
+                                                            type={field.type}
+                                                            value={
+                                                                intForm.data
+                                                                    .data[
+                                                                    field.name
+                                                                ] || ''
+                                                            }
+                                                            onChange={(e) =>
+                                                                intForm.setData(
+                                                                    'data',
+                                                                    {
+                                                                        ...intForm
+                                                                            .data
+                                                                            .data,
+                                                                        [field.name]:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                            placeholder={
+                                                                field.placeholder
+                                                            }
+                                                            className="border-border bg-muted"
+                                                        />
+                                                    )}
                                                 </div>
                                             ),
                                         )}
