@@ -7,6 +7,7 @@ use App\Services\IntegrationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
@@ -84,6 +85,11 @@ class SendAlertDelivery implements ShouldQueue
                 ? $this->safeErrorMessage($delivery, $exception)
                 : Str::limit($exception->getMessage(), 1000),
         ]);
+
+        if ($delivery?->alert_rule_id) {
+            $errorHash = md5($delivery->title.$delivery->message);
+            Cache::forget("alert_rule_{$delivery->alert_rule_id}_{$errorHash}_last_sent");
+        }
     }
 
     private function safeErrorMessage(AlertDelivery $delivery, Throwable $exception): string
