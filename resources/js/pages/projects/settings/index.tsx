@@ -1480,7 +1480,9 @@ export default function ProjectSettings({
                                                             </SelectTrigger>
                                                             <SelectContent>
                                                                 {field.options?.map(
-                                                                    (option: any) => (
+                                                                    (
+                                                                        option: any,
+                                                                    ) => (
                                                                         <SelectItem
                                                                             key={
                                                                                 option.value
