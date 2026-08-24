@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tyto.ingestion' => ProtectTytoIngestion::class,
         ]);
 
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->encryptCookies(except: ['appearance', 'locale', 'sidebar_state']);
 
         $middleware->web(append: [
             HandleAppearance::class,

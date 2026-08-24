@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { Activity, Moon, Sun } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { LocaleSwitcher } from '@/components/locale-switcher';
 import { TimeFilter } from '@/components/time-filter';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -10,6 +11,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useAppearance } from '@/hooks/use-appearance';
+import { useLocale } from '@/hooks/use-locale';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 export function AppSidebarHeader({
@@ -24,6 +26,7 @@ export function AppSidebarHeader({
             : props.breadcrumbs || [];
     const { resolvedAppearance, updateAppearance } = useAppearance();
     const isDark = resolvedAppearance === 'dark';
+    const { t } = useLocale();
 
     return (
         <header className="sticky top-0 z-50 flex h-[68px] shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-background/75 px-4 backdrop-blur-2xl transition-all sm:px-7">
@@ -33,7 +36,7 @@ export function AppSidebarHeader({
                         <SidebarTrigger className="-ml-1" />
                     </TooltipTrigger>
                     <TooltipContent side="bottom" align="start">
-                        Toggle Sidebar (Ctrl/⌘ + B)
+                        {t('header.toggleSidebar')}
                     </TooltipContent>
                 </Tooltip>
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
@@ -44,7 +47,7 @@ export function AppSidebarHeader({
                         <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-40" />
                         <span className="relative inline-flex size-2 rounded-full bg-primary" />
                     </span>
-                    Live telemetry
+                    {t('header.liveTelemetry')}
                     <Activity className="size-3" />
                 </div>
                 <Tooltip>
@@ -58,8 +61,8 @@ export function AppSidebarHeader({
                             }
                             aria-label={
                                 isDark
-                                    ? 'Switch to light theme'
-                                    : 'Switch to dark theme'
+                                    ? t('header.lightTheme')
+                                    : t('header.darkTheme')
                             }
                         >
                             {isDark ? (
@@ -70,9 +73,12 @@ export function AppSidebarHeader({
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom">
-                        {isDark ? 'Light theme' : 'Dark theme'}
+                        {isDark
+                            ? t('header.lightTheme')
+                            : t('header.darkTheme')}
                     </TooltipContent>
                 </Tooltip>
+                <LocaleSwitcher />
                 <TimeFilter />
             </div>
         </header>
