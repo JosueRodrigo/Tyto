@@ -24,6 +24,10 @@ export const filters = [
 
 export function TimeFilter() {
     const { props }: any = usePage();
+    const hasTimeContext = Object.prototype.hasOwnProperty.call(
+        props,
+        'period',
+    );
     const period = props.period || '24h';
     const selected = filters.find((f) => f.value === period) || {
         label: 'Custom',
@@ -33,6 +37,10 @@ export function TimeFilter() {
 
     const [fromDate, setFromDate] = useState(props.from || '');
     const [toDate, setToDate] = useState(props.to || '');
+
+    if (!hasTimeContext) {
+        return null;
+    }
 
     const handleFilterChange = (filter: any) => {
         const searchParams = new URLSearchParams(window.location.search);

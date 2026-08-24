@@ -28,18 +28,29 @@ export function WorkspaceSwitcher({
     const { props }: any = usePage();
     const isMobile = useIsMobile();
     const currentTeam = props.currentTeam;
-    const projects = props.projects ?? [];
+    const projects = useMemo(() => props.projects ?? [], [props.projects]);
     const currentProject = props.currentProject;
 
     const [search, setSearch] = useState('');
 
     const filteredTeams = useMemo(() => {
         const teamsList = props.teams ?? [];
+        const normalizedSearch = search.trim().toLowerCase();
 
-        return teamsList.filter((t: any) =>
-            t.name.toLowerCase().includes(search.toLowerCase()),
+        if (!normalizedSearch) {
+            return teamsList;
+        }
+
+        return teamsList.filter(
+            (team: any) =>
+                team.name.toLowerCase().includes(normalizedSearch) ||
+                projects.some(
+                    (project: any) =>
+                        project.team_id === team.id &&
+                        project.name.toLowerCase().includes(normalizedSearch),
+                ),
         );
-    }, [props.teams, search]);
+    }, [projects, props.teams, search]);
 
     const switchProject = (project: any) => {
         const projectTeam =
@@ -68,14 +79,14 @@ export function WorkspaceSwitcher({
                     className={
                         inHeader
                             ? 'h-9 max-w-[200px] gap-2 rounded-lg border border-border px-3 text-foreground/70 transition-all hover:bg-muted hover:text-foreground'
-                            : 'group w-full justify-start border border-border bg-muted/30 px-2 py-8 transition-all group-data-[collapsible=icon]:py-4 hover:bg-white/[0.05]'
+                            : 'group h-auto w-full justify-start rounded-2xl border border-border/70 bg-card/70 px-3 py-3 shadow-sm transition-all group-data-[collapsible=icon]:p-2 hover:border-primary/25 hover:bg-accent/70 hover:shadow-md'
                     }
                 >
                     <div
                         className={
                             inHeader
                                 ? 'flex aspect-square size-5 shrink-0 items-center justify-center rounded bg-blue-600/20 text-blue-400'
-                                : 'mr-3 flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-foreground group-data-[collapsible=icon]:mr-0 group-data-[collapsible=icon]:size-6'
+                                : 'mr-3 flex aspect-square size-9 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary shadow-[0_0_20px_rgba(159,85,255,0.12)] group-data-[collapsible=icon]:mr-0 group-data-[collapsible=icon]:size-7'
                         }
                     >
                         <Terminal className={inHeader ? 'size-3' : 'size-4'} />
@@ -113,22 +124,22 @@ export function WorkspaceSwitcher({
                         className={
                             inHeader
                                 ? 'ml-1 size-3 shrink-0 text-foreground/20'
-                                : 'ml-auto size-4 shrink-0 text-foreground/20 group-data-[collapsible=icon]:hidden'
+                                : 'ml-auto size-4 shrink-0 text-muted-foreground transition-transform group-data-[collapsible=icon]:hidden group-data-[state=open]:rotate-180'
                         }
                     />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                className="w-72 overflow-hidden rounded-xl border-border bg-card p-0 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+                className="w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border-border/70 bg-popover/95 p-0 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-2xl"
                 side={inHeader ? 'bottom' : isMobile ? 'bottom' : 'right'}
                 align={inHeader ? 'end' : 'start'}
                 sideOffset={inHeader ? 8 : 4}
             >
                 {/* Search Bar */}
-                <div className="flex items-center gap-2 border-b border-border px-3 py-3">
-                    <Search className="size-4 text-foreground/20" />
+                <div className="flex items-center gap-3 border-b border-border/70 bg-muted/25 px-4 py-3.5">
+                    <Search className="size-4 text-muted-foreground" />
                     <input
-                        className="w-full border-none bg-transparent p-0 text-sm text-foreground placeholder:text-foreground/20 focus:ring-0"
+                        className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-0"
                         placeholder="Find application or organization"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -137,9 +148,9 @@ export function WorkspaceSwitcher({
 
                 <div className="custom-scrollbar max-h-[400px] overflow-y-auto">
                     {/* Organizations/Teams Section */}
-                    <div className="p-1">
+                    <div className="p-2">
                         {filteredTeams.map((team: any) => (
-                            <div key={team.id} className="mb-4 last:mb-0">
+                            <div key={team.id} className="mb-3 last:mb-0">
                                 <div className="flex items-center justify-between px-3 py-2">
                                     <span
                                         className="truncate text-[11px] font-black tracking-[0.1em] text-foreground/30 uppercase"
@@ -174,7 +185,7 @@ export function WorkspaceSwitcher({
                                                 onSelect={() =>
                                                     switchProject(project)
                                                 }
-                                                className="group mx-1 flex cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2.5 transition-colors hover:bg-white/[0.03]"
+                                                className="group flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-3 py-3 transition-all data-[highlighted]:border-border data-[highlighted]:bg-accent/70"
                                             >
                                                 <div className="flex min-w-0 items-center gap-3">
                                                     <div
@@ -186,20 +197,20 @@ export function WorkspaceSwitcher({
                                                                 'from-orange-500 to-amber-400',
                                                                 'from-rose-500 to-pink-400',
                                                             ][index % 5]
-                                                        } flex items-center justify-center text-foreground shadow-lg`}
+                                                        } flex items-center justify-center text-white shadow-lg`}
                                                     >
                                                         <Layout className="size-5" />
                                                     </div>
                                                     <span
                                                         title={project.name}
-                                                        className={`truncate text-sm font-semibold ${currentProject?.id === project.id ? 'text-foreground' : 'text-foreground/60'}`}
+                                                        className={`truncate text-sm font-semibold ${currentProject?.id === project.id ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}
                                                     >
                                                         {project.name}
                                                     </span>
                                                 </div>
                                                 {currentProject?.id ===
                                                     project.id && (
-                                                    <Check className="size-4 shrink-0 text-foreground" />
+                                                    <Check className="size-4 shrink-0 text-primary" />
                                                 )}
                                             </DropdownMenuItem>
                                         ))}
@@ -209,15 +220,15 @@ export function WorkspaceSwitcher({
                     </div>
                 </div>
 
-                <DropdownMenuSeparator className="m-0 bg-muted" />
+                <DropdownMenuSeparator className="m-0 bg-border/70" />
 
-                <div className="p-1.5">
+                <div className="bg-muted/20 p-2">
                     <CreateProjectModal>
                         <DropdownMenuItem
                             onSelect={(e) => {
                                 e.preventDefault();
                             }}
-                            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-3 text-foreground/50 transition-colors hover:text-foreground"
+                            className="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                         >
                             <Plus className="size-4" />
                             <span className="text-sm font-semibold">

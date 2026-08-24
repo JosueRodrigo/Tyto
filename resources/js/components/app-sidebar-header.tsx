@@ -26,8 +26,8 @@ export function AppSidebarHeader({
     const isDark = resolvedAppearance === 'dark';
 
     return (
-        <header className="sticky top-0 z-50 flex h-[68px] shrink-0 items-center justify-between border-b border-border/60 bg-background/75 px-4 backdrop-blur-2xl transition-all sm:px-7">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-50 flex h-[68px] shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-background/75 px-4 backdrop-blur-2xl transition-all sm:px-7">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <SidebarTrigger className="-ml-1" />
@@ -38,7 +38,7 @@ export function AppSidebarHeader({
                 </Tooltip>
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                 <div className="hidden items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1.5 text-[10px] font-extrabold tracking-[0.12em] text-primary uppercase md:flex">
                     <span className="relative flex size-2">
                         <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-40" />
@@ -52,7 +52,7 @@ export function AppSidebarHeader({
                         <Button
                             variant="outline"
                             size="icon"
-                            className="rounded-full"
+                            className="size-9 rounded-full border-primary/20 bg-primary/8 text-primary shadow-[0_0_20px_rgba(159,85,255,0.1)] transition-all hover:border-primary/40 hover:bg-primary/15 hover:text-primary"
                             onClick={() =>
                                 updateAppearance(isDark ? 'light' : 'dark')
                             }
