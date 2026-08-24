@@ -47,7 +47,11 @@ class IntegrationService
 
             return true;
         } catch (Throwable $exception) {
-            Log::error('Integration failed: '.$integration->type.' - '.$exception->getMessage());
+            Log::error('Alert integration delivery failed.', [
+                'integration_id' => $integration->id,
+                'type' => $integration->type,
+                'error' => $this->safeErrorMessage($integration, $exception),
+            ]);
 
             return false;
         }
@@ -61,7 +65,7 @@ class IntegrationService
         } catch (Throwable $exception) {
             $integration->update([
                 'status' => 'failing',
-                'last_error' => $exception->getMessage(),
+                'last_error' => $this->safeErrorMessage($integration, $exception),
             ]);
 
             throw $exception;
@@ -266,6 +270,22 @@ class IntegrationService
                 $message->from($fromAddress, $fromName);
             }
         });
+    }
+
+    private function safeErrorMessage(Integration $integration, Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+        $configuration = $integration->data ?? [];
+
+        foreach ($integration->secretFields() as $field) {
+            $secret = $configuration[$field] ?? null;
+
+            if (is_string($secret) && $secret !== '') {
+                $message = str_replace($secret, '[redacted]', $message);
+            }
+        }
+
+        return Str::limit($message, 1000);
     }
 
     private function http(): PendingRequest
