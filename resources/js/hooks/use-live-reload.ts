@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 
 export function useLiveReload(
     projectId: number | string | undefined,
-    intervalMs = 5000,
+    intervalMs = 15000,
 ): void {
     const lastReloadAt = useRef(0);
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -13,20 +13,37 @@ export function useLiveReload(
             return;
         }
 
+        const clearTimer = () => {
+            if (timer.current) {
+                clearTimeout(timer.current);
+                timer.current = null;
+            }
+        };
+
         const reload = () => {
+            if (
+                isNavigating.current ||
+                document.visibilityState !== 'visible'
+            ) {
+                return;
+            }
+
             lastReloadAt.current = Date.now();
             router.reload({ preserveScroll: true, preserveState: true } as any);
         };
 
         const schedule = () => {
+            if (
+                isNavigating.current ||
+                document.visibilityState !== 'visible'
+            ) {
+                return;
+            }
+
             const elapsed = Date.now() - lastReloadAt.current;
 
             if (elapsed >= intervalMs) {
-                if (timer.current) {
-                    clearTimeout(timer.current);
-                    timer.current = null;
-                }
-
+                clearTimer();
                 reload();
 
                 return;
@@ -40,17 +57,23 @@ export function useLiveReload(
             }
         };
 
+        const removeStartListener = router.on('start', () => {
+            isNavigating.current = true;
+            clearTimer();
+        });
+        const removeFinishListener = router.on('finish', () => {
+            isNavigating.current = false;
+        });
+
         const channel = window.Echo.private(`project.${projectId}`).listen(
             '.ProjectDataIngested',
             schedule,
         );
 
         return () => {
-            if (timer.current) {
-                clearTimeout(timer.current);
-                timer.current = null;
-            }
-
+            clearTimer();
+            removeStartListener();
+            removeFinishListener();
             channel.stopListening('.ProjectDataIngested');
         };
     }, [projectId, intervalMs]);
