@@ -12,9 +12,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { switchMethod } from '@/routes/teams';
 import type { SharedData } from '@/types';
 import type { Team } from '@/types';
-import { switchMethod } from '@/routes/teams';
 
 type TeamSwitcherProps = {
     inHeader?: boolean;
