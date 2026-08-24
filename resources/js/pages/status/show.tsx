@@ -8,6 +8,11 @@ import {
 } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
 
+type DailyAvailability = {
+    date: string;
+    uptime: number | null;
+};
+
 const tone = (status: string) =>
     status === 'up' || status === 'active'
         ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
@@ -17,6 +22,9 @@ const tone = (status: string) =>
 
 export default function PublicStatus({ page }: any) {
     const operational = page.status === 'up';
+    const measuredDays = page.daily.filter(
+        (day: DailyAvailability) => day.uptime !== null,
+    ).length;
 
     return (
         <div className="relative min-h-screen overflow-hidden bg-[#050510] text-[#eaeaea]">
@@ -113,30 +121,39 @@ export default function PublicStatus({ page }: any) {
                                 Last 30 days
                             </h2>
                         </div>
-                        <span className="text-xs text-white/35">
-                            Daily signal
+                        <span className="text-right text-xs text-white/35">
+                            {measuredDays} of 30 days monitored
                         </span>
                     </div>
                     <div
-                        className="flex h-24 items-end gap-1.5"
+                        className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-1.5 sm:grid-cols-[repeat(30,minmax(0,1fr))]"
                         aria-label="Daily availability"
                     >
-                        {page.daily.length ? (
-                            page.daily.map((day: any) => (
+                        {page.daily.map((day: DailyAvailability) => {
+                            const label = new Date(
+                                `${day.date}T12:00:00`,
+                            ).toLocaleDateString(undefined, {
+                                day: '2-digit',
+                                month: 'short',
+                            });
+                            const title =
+                                day.uptime === null
+                                    ? `${label}: No data`
+                                    : `${label}: ${day.uptime}% uptime`;
+
+                            return (
                                 <div
                                     key={day.date}
-                                    title={`${day.date}: ${day.uptime}%`}
-                                    className={`min-w-1 flex-1 rounded-full transition-opacity hover:opacity-70 ${day.uptime >= 99 ? 'bg-primary' : day.uptime >= 90 ? 'bg-amber-400' : 'bg-red-400'}`}
-                                    style={{
-                                        height: `${Math.max(12, day.uptime)}%`,
-                                    }}
+                                    title={title}
+                                    aria-label={title}
+                                    className={`h-12 rounded-md border transition duration-200 hover:-translate-y-1 hover:brightness-125 sm:h-16 ${availabilityTone(day.uptime)}`}
                                 />
-                            ))
-                        ) : (
-                            <p className="self-center text-sm text-white/40">
-                                No availability history yet.
-                            </p>
-                        )}
+                            );
+                        })}
+                    </div>
+                    <div className="mt-4 flex items-center justify-between text-[10px] font-bold tracking-[0.12em] text-white/30 uppercase">
+                        <span>30 days ago</span>
+                        <span>Today</span>
                     </div>
                 </section>
 
@@ -180,6 +197,22 @@ export default function PublicStatus({ page }: any) {
             </main>
         </div>
     );
+}
+
+function availabilityTone(uptime: number | null) {
+    if (uptime === null) {
+        return 'border-white/5 bg-white/[0.04]';
+    }
+
+    if (uptime >= 99) {
+        return 'border-emerald-300/30 bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.18)]';
+    }
+
+    if (uptime >= 90) {
+        return 'border-amber-300/30 bg-amber-400';
+    }
+
+    return 'border-red-300/30 bg-red-400';
 }
 
 function Metric({ icon: Icon, label, value }: any) {
