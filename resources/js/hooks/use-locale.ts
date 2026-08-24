@@ -140,9 +140,7 @@ const storedLocale = (): Locale => {
         .find((cookie) => cookie.startsWith(`${LOCALE_COOKIE}=`))
         ?.split('=')[1];
 
-    return value === 'en' || value === 'pt-BR' || value === 'es'
-        ? value
-        : 'en';
+    return value === 'en' || value === 'pt-BR' || value === 'es' ? value : 'en';
 };
 
 const applyLocale = (locale: Locale) => {
