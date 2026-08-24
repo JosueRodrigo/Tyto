@@ -1,13 +1,15 @@
 import { usePage } from '@inertiajs/react';
-import { Activity } from 'lucide-react';
+import { Activity, Moon, Sun } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { TimeFilter } from '@/components/time-filter';
+import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useAppearance } from '@/hooks/use-appearance';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 
 export function AppSidebarHeader({
@@ -20,6 +22,8 @@ export function AppSidebarHeader({
         providedBreadcrumbs && providedBreadcrumbs.length > 0
             ? providedBreadcrumbs
             : props.breadcrumbs || [];
+    const { resolvedAppearance, updateAppearance } = useAppearance();
+    const isDark = resolvedAppearance === 'dark';
 
     return (
         <header className="sticky top-0 z-50 flex h-[68px] shrink-0 items-center justify-between border-b border-border/60 bg-background/75 px-4 backdrop-blur-2xl transition-all sm:px-7">
@@ -43,6 +47,32 @@ export function AppSidebarHeader({
                     Live telemetry
                     <Activity className="size-3" />
                 </div>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="rounded-full"
+                            onClick={() =>
+                                updateAppearance(isDark ? 'light' : 'dark')
+                            }
+                            aria-label={
+                                isDark
+                                    ? 'Switch to light theme'
+                                    : 'Switch to dark theme'
+                            }
+                        >
+                            {isDark ? (
+                                <Sun className="size-4" />
+                            ) : (
+                                <Moon className="size-4" />
+                            )}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                        {isDark ? 'Light theme' : 'Dark theme'}
+                    </TooltipContent>
+                </Tooltip>
                 <TimeFilter />
             </div>
         </header>
