@@ -62,16 +62,25 @@ class StatusPageController extends Controller
         $total = $checks->count();
         $up = $checks->where('status', 'up')->count();
 
-        $daily = $project->uptimeChecks()
+        $dailyChecks = $project->uptimeChecks()
             ->selectRaw('DATE(checked_at) as day, COUNT(*) as total, SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as successful', ['up'])
             ->where('checked_at', '>=', now()->subDays(30))
             ->groupBy(DB::raw('DATE(checked_at)'))
             ->orderBy('day')
             ->get()
-            ->map(fn ($day) => [
-                'date' => $day->day,
-                'uptime' => $day->total ? round(($day->successful / $day->total) * 100, 2) : null,
-            ]);
+            ->keyBy('day');
+
+        $daily = collect(range(29, 0))->map(function (int $daysAgo) use ($dailyChecks): array {
+            $date = now()->subDays($daysAgo)->toDateString();
+            $day = $dailyChecks->get($date);
+
+            return [
+                'date' => $date,
+                'uptime' => $day?->total
+                    ? round(($day->successful / $day->total) * 100, 2)
+                    : null,
+            ];
+        });
 
         return Inertia::render('status/show', [
             'page' => [
