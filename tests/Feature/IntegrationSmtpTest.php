@@ -44,6 +44,45 @@ test('blank secrets keep the existing credential during an update', function () 
     expect($configuration['smtp_password'])->toBe('existing-password');
 });
 
+test('legacy plaintext integration configuration remains readable', function () {
+    $project = Project::factory()->create();
+
+    $id = DB::table('integrations')->insertGetId([
+        'project_id' => $project->id,
+        'name' => 'Legacy webhook',
+        'type' => 'webhook',
+        'data' => json_encode(['url' => 'https://example.com/hook']),
+        'is_enabled' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $integration = Integration::findOrFail($id);
+
+    expect($integration->data)->toBe(['url' => 'https://example.com/hook'])
+        ->and($integration->hasUnreadableConfiguration())->toBeFalse();
+});
+
+test('configuration encrypted with another key does not break the settings page', function () {
+    $project = Project::factory()->create();
+
+    $id = DB::table('integrations')->insertGetId([
+        'project_id' => $project->id,
+        'name' => 'Unreadable webhook',
+        'type' => 'webhook',
+        'data' => 'invalid-encrypted-payload',
+        'is_enabled' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $integration = Integration::findOrFail($id);
+
+    expect($integration->data)->toBe([])
+        ->and($integration->configurationForDisplay())->toBe([])
+        ->and($integration->hasUnreadableConfiguration())->toBeTrue();
+});
+
 test('email integrations build and use their own smtp transport', function () {
     $mailer = Mockery::mock(Mailer::class);
     $mailer->shouldReceive('raw')->once();

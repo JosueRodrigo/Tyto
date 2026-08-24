@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Crypt;
@@ -20,6 +21,20 @@ return new class extends Migration
                     continue;
                 }
 
+                try {
+                    Crypt::decryptString($integration->data);
+
+                    continue;
+                } catch (DecryptException) {
+                    // Continue only for legacy JSON values below.
+                }
+
+                json_decode($integration->data, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    continue;
+                }
+
                 DB::table('integrations')->where('id', $integration->id)->update([
                     'data' => Crypt::encryptString($integration->data),
                 ]);
@@ -35,9 +50,13 @@ return new class extends Migration
                     continue;
                 }
 
-                DB::table('integrations')->where('id', $integration->id)->update([
-                    'data' => Crypt::decryptString($integration->data),
-                ]);
+                try {
+                    $decrypted = Crypt::decryptString($integration->data);
+                } catch (DecryptException) {
+                    continue;
+                }
+
+                DB::table('integrations')->where('id', $integration->id)->update(['data' => $decrypted]);
             }
         });
 

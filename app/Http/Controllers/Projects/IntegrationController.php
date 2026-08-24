@@ -19,6 +19,7 @@ class IntegrationController extends Controller
         $integrations = $project->integrations->map(function (Integration $integration) {
             $attributes = $integration->toArray();
             $attributes['data'] = $integration->configurationForDisplay();
+            $attributes['configuration_error'] = $integration->hasUnreadableConfiguration();
 
             return $attributes;
         });
