@@ -1336,13 +1336,33 @@ export default function ProjectSettings({
                                                                         : 'Off'}
                                                                 </Badge>
                                                             </div>
+                                                            {int.configuration_error && (
+                                                                <div className="mb-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-500">
+                                                                    These
+                                                                    credentials
+                                                                    were
+                                                                    encrypted
+                                                                    with a
+                                                                    different
+                                                                    application
+                                                                    key and
+                                                                    cannot be
+                                                                    recovered.
+                                                                    Edit this
+                                                                    connection
+                                                                    and enter
+                                                                    the secret
+                                                                    again.
+                                                                </div>
+                                                            )}
                                                             <div className="flex gap-2">
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     disabled={
                                                                         testingId ===
-                                                                        int.id
+                                                                            int.id ||
+                                                                        int.configuration_error
                                                                     }
                                                                     onClick={() =>
                                                                         handleTestIntegration(
