@@ -34,5 +34,9 @@ it('renders only public operational data for an enabled status page', function (
             ->component('status/show')
             ->where('page.title', 'Acme Cloud')
             ->where('page.status', 'up')
+            ->has('page.daily', 30)
+            ->where('page.daily.29.date', now()->toDateString())
+            ->where('page.daily.29.uptime', 100)
+            ->where('page.daily.28.uptime', null)
             ->missing('page.api_token'));
 });
