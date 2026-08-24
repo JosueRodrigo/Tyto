@@ -15,6 +15,8 @@ Schedule::call(function (): void {
     RecordWorkerHeartbeat::dispatch();
 })->everyMinute()->name('tyto-health-pulse')->withoutOverlapping();
 
-Schedule::command('projects:check-health')->everyThirtySeconds();
+Schedule::command('projects:check-health')
+    ->everyMinute()
+    ->withoutOverlapping();
 Schedule::command('model:prune')->daily();
 Schedule::command('tyto:update --check')->daily();
