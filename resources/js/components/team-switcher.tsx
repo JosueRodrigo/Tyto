@@ -12,9 +12,9 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { switchMethod } from '@/routes/teams';
 import type { SharedData } from '@/types';
 import type { Team } from '@/types';
+import { switchMethod } from '@/routes/teams';
 
 type TeamSwitcherProps = {
     inHeader?: boolean;
@@ -66,7 +66,15 @@ export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
                     }
                 >
                     <div className="mr-2 flex aspect-square size-6 items-center justify-center rounded bg-blue-600/20 text-blue-400 group-data-[collapsible=icon]:mr-0">
-                        <Users className="size-3" />
+                        {currentTeam?.logoUrl ? (
+                            <img
+                                src={currentTeam.logoUrl}
+                                alt=""
+                                className="size-full rounded-[inherit] object-cover"
+                            />
+                        ) : (
+                            <Users className="size-3" />
+                        )}
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                         <span className="truncate font-bold tracking-tight text-foreground/90">
@@ -103,7 +111,18 @@ export function TeamSwitcher({ inHeader = false }: TeamSwitcherProps) {
                         }
                         onSelect={() => switchTeam(team)}
                     >
-                        {team.name}
+                        <div className="grid size-7 shrink-0 place-items-center overflow-hidden rounded-md bg-muted text-[9px] font-bold">
+                            {team.logoUrl ? (
+                                <img
+                                    src={team.logoUrl}
+                                    alt=""
+                                    className="size-full object-cover"
+                                />
+                            ) : (
+                                team.name.slice(0, 2).toUpperCase()
+                            )}
+                        </div>
+                        <span className="truncate">{team.name}</span>
                         {currentTeam?.id === team.id && (
                             <Check
                                 className={
