@@ -6,6 +6,7 @@ use App\Models\AlertDelivery;
 use App\Services\IntegrationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use RuntimeException;
 use Throwable;
 
@@ -18,6 +19,15 @@ class SendAlertDelivery implements ShouldQueue
     public int $timeout = 30;
 
     public function __construct(public int $deliveryId) {}
+
+    public function middleware(): array
+    {
+        return [
+            (new WithoutOverlapping("alert-delivery:{$this->deliveryId}"))
+                ->dontRelease()
+                ->expireAfter($this->timeout + 10),
+        ];
+    }
 
     public function backoff(): array
     {
