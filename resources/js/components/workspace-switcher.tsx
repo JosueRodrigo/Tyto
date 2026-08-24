@@ -1,9 +1,7 @@
 import { router, usePage } from '@inertiajs/react';
 import {
-    Building2,
     Check,
     ChevronsUpDown,
-    FolderOpen,
     Plus,
     Layout,
     Terminal,
