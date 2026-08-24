@@ -291,7 +291,7 @@ class IntegrationService
                     ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'placeholder' => 'ops@example.com'],
                     ['name' => 'smtp_host', 'label' => 'SMTP Host', 'type' => 'text', 'placeholder' => 'smtp.example.com'],
                     ['name' => 'smtp_port', 'label' => 'SMTP Port', 'type' => 'number', 'placeholder' => '587'],
-                    ['name' => 'smtp_encryption', 'label' => 'Encryption', 'type' => 'select', 'options' => [['value' => 'tls', 'label' => 'TLS'], ['value' => 'ssl', 'label' => 'SSL'], ['value' => 'none', 'label' => 'None']],
+                    ['name' => 'smtp_encryption', 'label' => 'Encryption', 'type' => 'select', 'options' => [['value' => 'tls', 'label' => 'TLS'], ['value' => 'ssl', 'label' => 'SSL'], ['value' => 'none', 'label' => 'None']]],
                     ['name' => 'smtp_username', 'label' => 'SMTP Username', 'type' => 'text', 'placeholder' => 'mailer@example.com'],
                     ['name' => 'smtp_password', 'label' => 'SMTP Password', 'type' => 'password', 'placeholder' => 'Leave blank to keep the saved password'],
                     ['name' => 'from_address', 'label' => 'From Address', 'type' => 'email', 'placeholder' => 'alerts@example.com'],
