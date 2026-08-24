@@ -127,7 +127,10 @@ class IntegrationController extends Controller
                 'data.bot_token' => [$updating ? 'nullable' : 'required', 'string', 'max:255'],
                 'data.chat_id' => ['required', 'string', 'max:255'],
             ],
-            'webhook' => ['data.url' => [$updating ? 'nullable' : 'required', 'url', 'max:2048']],
+            'webhook' => [
+                'data.url' => [$updating ? 'nullable' : 'required', 'url', 'max:2048'],
+                'data.signing_secret' => ['nullable', 'string', 'min:16', 'max:255'],
+            ],
             'email' => [
                 'data.email' => ['required', 'email:rfc', 'max:255'],
                 'data.smtp_host' => ['required', 'string', 'max:255'],
