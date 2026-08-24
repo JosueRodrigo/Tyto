@@ -18,6 +18,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLocale } from '@/hooks/use-locale';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function WorkspaceSwitcher({
@@ -30,6 +31,7 @@ export function WorkspaceSwitcher({
     const currentTeam = props.currentTeam;
     const projects = useMemo(() => props.projects ?? [], [props.projects]);
     const currentProject = props.currentProject;
+    const { t } = useLocale();
 
     const [search, setSearch] = useState('');
 
@@ -107,7 +109,7 @@ export function WorkspaceSwitcher({
                                         : 'truncate text-sm font-bold tracking-tight text-foreground uppercase'
                                 }
                             >
-                                {currentTeam?.name ?? 'Select Team'}
+                                {currentTeam?.name ?? t('workspace.selectTeam')}
                             </span>
                         </div>
                         <div className="mt-0.5 flex w-full items-center gap-1">
@@ -116,7 +118,7 @@ export function WorkspaceSwitcher({
                                 title={currentProject?.name}
                                 className="truncate text-[10px] font-medium tracking-tight text-foreground/60"
                             >
-                                {currentProject?.name ?? 'No Project'}
+                                {currentProject?.name ?? t('workspace.noProject')}
                             </span>
                         </div>
                     </div>
@@ -140,7 +142,7 @@ export function WorkspaceSwitcher({
                     <Search className="size-4 text-muted-foreground" />
                     <input
                         className="w-full border-none bg-transparent p-0 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-0"
-                        placeholder="Find application or organization"
+                        placeholder={t('workspace.search')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -232,7 +234,7 @@ export function WorkspaceSwitcher({
                         >
                             <Plus className="size-4" />
                             <span className="text-sm font-semibold">
-                                New Application
+                                {t('workspace.newApplication')}
                             </span>
                         </DropdownMenuItem>
                     </CreateProjectModal>
