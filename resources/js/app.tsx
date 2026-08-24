@@ -7,6 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import '@/lib/echo';
+import { initializeDocumentLocalization } from '@/lib/document-localization';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -44,3 +45,4 @@ createInertiaApp({
 // This will set light / dark mode on load...
 initializeTheme();
 initializeLocale();
+initializeDocumentLocalization();
