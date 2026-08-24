@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\Integration;
 use App\Models\Issue;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Mail\MailManager;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use RuntimeException;
 use Throwable;
 
@@ -129,7 +131,8 @@ class IntegrationService
             ];
         }
 
-        Http::post($webhookUrl, ['blocks' => $blocks])->throw();
+        $this->assertAllowedWebhookUrl($webhookUrl, ['hooks.slack.com']);
+        $this->http()->post($webhookUrl, ['blocks' => $blocks])->throw();
     }
 
     protected function sendToDiscord(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
@@ -144,7 +147,8 @@ class IntegrationService
             $discordFields[] = ['name' => $label, 'value' => (string) $value, 'inline' => true];
         }
 
-        Http::post($webhookUrl, [
+        $this->assertAllowedWebhookUrl($webhookUrl, ['discord.com', 'discordapp.com']);
+        $this->http()->post($webhookUrl, [
             'embeds' => [[
                 'title' => $title,
                 'description' => $message,
@@ -173,7 +177,7 @@ class IntegrationService
             $text .= "[View Details]({$url})";
         }
 
-        Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
+        $this->http()->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
             'chat_id' => $chatId,
             'text' => $text,
             'parse_mode' => 'Markdown',
@@ -187,14 +191,26 @@ class IntegrationService
             throw new RuntimeException('Webhook URL is not configured.');
         }
 
-        Http::post($webhookUrl, [
+        $this->assertAllowedWebhookUrl($webhookUrl);
+
+        $payload = [
             'event' => 'tyto.alert',
             'title' => $title,
             'message' => $message,
             'fields' => $fields,
             'url' => $url,
             'timestamp' => now()->timestamp,
-        ])->throw();
+        ];
+        $request = $this->http();
+        $signingSecret = $integration->data['signing_secret'] ?? null;
+
+        if ($signingSecret) {
+            $request = $request->withHeaders([
+                'X-Tyto-Signature' => 'sha256='.hash_hmac('sha256', json_encode($payload, JSON_THROW_ON_ERROR), $signingSecret),
+            ]);
+        }
+
+        $request->post($webhookUrl, $payload)->throw();
     }
 
     protected function sendToEmail(Integration $integration, string $title, string $message, array $fields = [], ?string $url = null): void
@@ -252,6 +268,36 @@ class IntegrationService
         });
     }
 
+    private function http(): PendingRequest
+    {
+        return Http::acceptJson()
+            ->connectTimeout(3)
+            ->timeout(10);
+    }
+
+    private function assertAllowedWebhookUrl(string $url, array $allowedHosts = []): void
+    {
+        $scheme = Str::lower((string) parse_url($url, PHP_URL_SCHEME));
+        $host = Str::lower((string) parse_url($url, PHP_URL_HOST));
+
+        if ($scheme !== 'https' || blank($host)) {
+            throw new RuntimeException('Integration endpoints must use HTTPS.');
+        }
+
+        if ($allowedHosts !== [] && ! in_array($host, $allowedHosts, true)) {
+            throw new RuntimeException('The webhook host is not allowed for this integration.');
+        }
+
+        if ($host === 'localhost' || Str::endsWith($host, ['.local', '.internal'])) {
+            throw new RuntimeException('Private integration endpoints are not allowed.');
+        }
+
+        if (filter_var($host, FILTER_VALIDATE_IP)
+            && ! filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            throw new RuntimeException('Private integration endpoints are not allowed.');
+        }
+    }
+
     public function getAvailableTypes(): array
     {
         return [
@@ -282,6 +328,7 @@ class IntegrationService
                 'name' => 'Webhook',
                 'fields' => [
                     ['name' => 'url', 'label' => 'Webhook URL', 'type' => 'url', 'placeholder' => 'https://api.yourdomain.com/webhook'],
+                    ['name' => 'signing_secret', 'label' => 'Signing Secret', 'type' => 'password', 'placeholder' => 'Optional HMAC secret'],
                 ],
             ],
             [
