@@ -35,13 +35,6 @@ class CheckProjectUptime extends Command
         // 2. Check Heartbeats
         $this->checkHeartbeats($alertService);
 
-        // 3. Support sub-minute intervals (30s)
-        if (Project::withUptimeMonitoring()->where('uptime_check_interval', '<', 60)->exists()) {
-            $this->info('Waiting 30 seconds for next sub-minute check...');
-            sleep(30);
-            $this->performUptimeChecks($alertService);
-        }
-
         $this->info('Health checks completed.');
     }
 
