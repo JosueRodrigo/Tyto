@@ -196,11 +196,9 @@ class IngestService
             'message' => $message, // Update with latest duration
         ]);
 
-        if ($issue->wasRecentlyCreated) {
-            $this->alertService->notifySlowPerformance($issue);
-        }
-
         $record->update(['issue_id' => $issue->id]);
+
+        $this->alertService->notifySlowPerformance($issue);
     }
 
     /**
@@ -225,11 +223,9 @@ class IngestService
         $issue->increment('occurrences_count');
         $issue->update(['last_seen_at' => now()]);
 
-        if ($issue->wasRecentlyCreated) {
-            $this->alertService->notifyNewIssue($issue);
-        }
-
         $record->update(['issue_id' => $issue->id]);
+
+        $this->alertService->notifyNewIssue($issue);
 
         // Detect Spike
         $this->detectErrorSpike($project);
