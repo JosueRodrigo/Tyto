@@ -55,6 +55,7 @@ Route::prefix('{current_team}/{project}')
         // Issues
         Route::get('issues', [IssueController::class, 'index'])->name('issues');
         Route::get('issues/{issue}', [IssueController::class, 'show'])->name('issues.show');
+        Route::patch('issues/bulk', [IssueController::class, 'bulkUpdate'])->name('issues.bulk-update');
         Route::patch('issues/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('issues/{issue}/comments', [IssueController::class, 'comment'])->name('issues.comment');
 
