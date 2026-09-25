@@ -77,6 +77,30 @@ class IssueController extends Controller
     }
 
     /**
+     * Update multiple issues from the incident center.
+     */
+    public function bulkUpdate(Request $request, Team $current_team, Project $project): RedirectResponse
+    {
+        $validated = $request->validate([
+            'issue_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'issue_ids.*' => ['required', 'integer', 'distinct'],
+            'status' => ['required', 'string', 'in:resolved,ignored'],
+        ]);
+
+        $issues = $project->issues()
+            ->whereIn('id', $validated['issue_ids'])
+            ->get();
+
+        abort_if($issues->count() !== count($validated['issue_ids']), 422, 'One or more issues do not belong to this project.');
+
+        foreach ($issues as $issue) {
+            $this->issueService->updateIssue($issue, ['status' => $validated['status']]);
+        }
+
+        return back()->with('success', $issues->count().' issues updated successfully.');
+    }
+
+    /**
      * Add a comment/activity to the issue.
      */
     public function comment(Request $request, Team $current_team, Project $project, Issue $issue): RedirectResponse
