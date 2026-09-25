@@ -6,9 +6,14 @@ import {
     ArrowUpDown,
     User as UserIcon,
     Check,
+    CheckCircle2,
+    X,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Pagination } from '@/components/pagination';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -50,8 +55,19 @@ export function IssueTable({
     const period = props.period as string | null | undefined;
     const from = props.from as string | null | undefined;
     const to = props.to as string | null | undefined;
-
     const data = issues.data || [];
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [bulkProcessing, setBulkProcessing] = useState(false);
+    const supportsBulkActions = baseUrl === 'issues';
+    const pageIds = data.map((issue: any) => Number(issue.id));
+    const allPageSelected =
+        pageIds.length > 0 && pageIds.every((id: number) => selectedIds.includes(id));
+    const somePageSelected = pageIds.some((id: number) => selectedIds.includes(id));
+
+    useEffect(() => {
+        setSelectedIds([]);
+    }, [issues.current_page]);
+
     const issueHref = (issue: any) =>
         appendMonitoringQuery(
             `/${teamSlug}/${projectSlug}/${baseUrl}/${baseUrl === 'issues' ? issue.id : issue.hash || issue.id}`,
@@ -61,6 +77,41 @@ export function IssueTable({
     const updateIssue = (id: number, data: any) => {
         router.patch(`/${teamSlug}/${projectSlug}/${baseUrl}/${id}`, data, {
             preserveScroll: true,
+        });
+    };
+
+    const togglePage = () => {
+        setSelectedIds((current) =>
+            allPageSelected
+                ? current.filter((id) => !pageIds.includes(id))
+                : Array.from(new Set([...current, ...pageIds])),
+        );
+    };
+
+    const toggleIssue = (id: number) => {
+        setSelectedIds((current) =>
+            current.includes(id)
+                ? current.filter((selectedId) => selectedId !== id)
+                : [...current, id],
+        );
+    };
+
+    const bulkUpdate = (status: 'resolved' | 'ignored') => {
+        if (selectedIds.length === 0) return;
+
+        const action = status === 'resolved' ? 'resolve' : 'ignore';
+        if (!window.confirm(`Are you sure you want to ${action} ${selectedIds.length} selected issue(s)?`)) {
+            return;
+        }
+
+        setBulkProcessing(true);
+        router.patch(`/${teamSlug}/${projectSlug}/issues/bulk`, {
+            issue_ids: selectedIds,
+            status,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => setSelectedIds([]),
+            onFinish: () => setBulkProcessing(false),
         });
     };
 
@@ -75,221 +126,87 @@ export function IssueTable({
     const priorities = ['none', 'low', 'medium', 'high', 'critical'];
 
     return (
-        <div className="overflow-x-auto">
+        <div>
+            {supportsBulkActions && selectedIds.length > 0 && (
+                <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <span>{selectedIds.length} selected</span>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedIds([])} disabled={bulkProcessing}>
+                            <X className="size-4" /> Clear
+                        </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => bulkUpdate('ignored')} disabled={bulkProcessing}>
+                            Ignore selected
+                        </Button>
+                        <Button size="sm" onClick={() => bulkUpdate('resolved')} disabled={bulkProcessing}>
+                            <CheckCircle2 className="size-4" /> Resolve selected
+                        </Button>
+                    </div>
+                </div>
+            )}
+            <div className="overflow-x-auto">
             <Table>
                 <TableHeader className="border-b border-border bg-muted/40">
                     <TableRow className="border-none hover:bg-transparent">
-                        <TableHead className="hidden w-20 pl-6 md:table-cell">
-                            <div className="flex cursor-pointer items-center gap-1 transition-colors hover:text-foreground">
-                                ID <ArrowUpDown className="h-3 w-3" />
-                            </div>
-                        </TableHead>
+                        {supportsBulkActions && (
+                            <TableHead className="w-10 pl-4">
+                                <Checkbox
+                                    checked={allPageSelected ? true : somePageSelected ? 'indeterminate' : false}
+                                    onCheckedChange={togglePage}
+                                    aria-label="Select all issues on this page"
+                                />
+                            </TableHead>
+                        )}
+                        <TableHead className="hidden w-20 pl-6 md:table-cell">ID</TableHead>
                         <TableHead className="w-10"></TableHead>
-                        <TableHead className="min-w-[300px]">
-                            <div className="flex cursor-pointer items-center gap-1 transition-colors hover:text-foreground">
-                                ISSUE <ChevronDown className="h-3 w-3" />
-                            </div>
-                        </TableHead>
-                        <TableHead className="hidden text-right sm:table-cell">
-                            <div className="flex cursor-pointer items-center justify-end gap-1 transition-colors hover:text-foreground">
-                                COUNT <ArrowUpDown className="h-3 w-3" />
-                            </div>
-                        </TableHead>
-                        <TableHead className="hidden text-right lg:table-cell">
-                            <div className="flex cursor-pointer items-center justify-end gap-1 transition-colors hover:text-foreground">
-                                USERS <ArrowUpDown className="h-3 w-3" />
-                            </div>
-                        </TableHead>
-                        <TableHead className="hidden text-right xl:table-cell">
-                            <div className="flex cursor-pointer items-center justify-end gap-1 whitespace-nowrap transition-colors hover:text-foreground">
-                                FIRST SEEN <ArrowUpDown className="h-3 w-3" />
-                            </div>
-                        </TableHead>
-                        <TableHead className="text-right text-foreground">
-                            <div className="flex cursor-pointer items-center justify-end gap-1 font-bold whitespace-nowrap transition-colors hover:text-foreground">
-                                LAST SEEN <ChevronDown className="h-3 w-3" />
-                            </div>
-                        </TableHead>
-                        <TableHead className="hidden w-24 pr-6 text-right sm:table-cell">
-                            ASSIGNED
-                        </TableHead>
+                        <TableHead className="min-w-[300px]">ISSUE</TableHead>
+                        <TableHead className="hidden text-right sm:table-cell">COUNT</TableHead>
+                        <TableHead className="hidden text-right lg:table-cell">USERS</TableHead>
+                        <TableHead className="hidden text-right xl:table-cell">FIRST SEEN</TableHead>
+                        <TableHead className="text-right text-foreground">LAST SEEN</TableHead>
+                        <TableHead className="hidden w-24 pr-6 text-right sm:table-cell">ASSIGNED</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {data.map((issue: any) => (
-                        <TableRow
-                            key={issue.id}
-                            className="group h-[72px] border-border/70 transition-colors hover:bg-primary/[0.035]"
-                        >
-                            <TableCell className="hidden pl-6 font-mono text-xs text-muted-foreground md:table-cell">
-                                #{issue.id}
-                            </TableCell>
+                        <TableRow key={issue.id} className="group h-[72px] border-border/70 transition-colors hover:bg-primary/[0.035]">
+                            {supportsBulkActions && (
+                                <TableCell className="pl-4">
+                                    <Checkbox checked={selectedIds.includes(Number(issue.id))} onCheckedChange={() => toggleIssue(Number(issue.id))} aria-label={`Select issue #${issue.id}`} />
+                                </TableCell>
+                            )}
+                            <TableCell className="hidden pl-6 font-mono text-xs text-muted-foreground md:table-cell">#{issue.id}</TableCell>
                             <TableCell>
                                 <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <button className="cursor-pointer rounded p-1 transition-colors hover:bg-muted">
-                                            <BarChart2
-                                                className={`h-4 w-4 ${
-                                                    issue.priority ===
-                                                    'critical'
-                                                        ? 'text-red-500'
-                                                        : issue.priority ===
-                                                            'high'
-                                                          ? 'text-orange-500'
-                                                          : issue.priority ===
-                                                              'medium'
-                                                            ? 'text-yellow-500'
-                                                            : issue.priority ===
-                                                                'low'
-                                                              ? 'text-blue-500'
-                                                              : 'text-muted-foreground'
-                                                }`}
-                                            />
-                                        </button>
-                                    </DropdownMenuTrigger>
+                                    <DropdownMenuTrigger asChild><button className="cursor-pointer rounded p-1 transition-colors hover:bg-muted"><BarChart2 className={`h-4 w-4 ${issue.priority === 'critical' ? 'text-red-500' : issue.priority === 'high' ? 'text-orange-500' : issue.priority === 'medium' ? 'text-yellow-500' : issue.priority === 'low' ? 'text-blue-500' : 'text-muted-foreground'}`} /></button></DropdownMenuTrigger>
                                     <DropdownMenuContent className="border-border bg-popover text-popover-foreground">
-                                        <DropdownMenuLabel className="text-[10px] tracking-widest text-muted-foreground uppercase">
-                                            Set Priority
-                                        </DropdownMenuLabel>
+                                        <DropdownMenuLabel className="text-[10px] tracking-widest text-muted-foreground uppercase">Set Priority</DropdownMenuLabel>
                                         <DropdownMenuSeparator className="bg-border" />
-                                        {priorities.map((p) => (
-                                            <DropdownMenuItem
-                                                key={p}
-                                                onClick={() =>
-                                                    updateIssue(issue.id, {
-                                                        priority: p,
-                                                    })
-                                                }
-                                                className="flex cursor-pointer items-center justify-between text-xs capitalize"
-                                            >
-                                                {p}
-                                                {issue.priority === p && (
-                                                    <Check className="h-3 w-3" />
-                                                )}
-                                            </DropdownMenuItem>
-                                        ))}
+                                        {priorities.map((p) => <DropdownMenuItem key={p} onClick={() => updateIssue(issue.id, { priority: p })} className="flex cursor-pointer items-center justify-between text-xs capitalize">{p}{issue.priority === p && <Check className="h-3 w-3" />}</DropdownMenuItem>)}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
                             <TableCell>
-                                <Link
-                                    href={issueHref(issue)}
-                                    className="flex w-[150px] flex-col sm:w-[250px] md:w-[350px] lg:w-[350px]"
-                                >
+                                <Link href={issueHref(issue)} className="flex w-[150px] flex-col sm:w-[250px] md:w-[350px] lg:w-[350px]">
                                     <TooltipProvider delayDuration={100}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <div className="truncate text-left text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
-                                                    {issue.title}
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="max-w-[400px] border-border bg-popover font-mono text-xs break-all text-popover-foreground shadow-2xl">
-                                                {issue.title}
-                                            </TooltipContent>
-                                        </Tooltip>
-
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <div className="mt-0.5 truncate text-left text-[11px] text-muted-foreground">
-                                                    {issue.message}
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="max-w-[400px] border-border bg-popover font-mono text-xs break-all text-popover-foreground shadow-2xl">
-                                                {issue.message}
-                                            </TooltipContent>
-                                        </Tooltip>
+                                        <Tooltip><TooltipTrigger asChild><div className="truncate text-left text-sm font-semibold text-foreground transition-colors group-hover:text-primary">{issue.title}</div></TooltipTrigger><TooltipContent className="max-w-[400px] border-border bg-popover font-mono text-xs break-all text-popover-foreground shadow-2xl">{issue.title}</TooltipContent></Tooltip>
+                                        <Tooltip><TooltipTrigger asChild><div className="mt-0.5 truncate text-left text-[11px] text-muted-foreground">{issue.message}</div></TooltipTrigger><TooltipContent className="max-w-[400px] border-border bg-popover font-mono text-xs break-all text-popover-foreground shadow-2xl">{issue.message}</TooltipContent></Tooltip>
                                     </TooltipProvider>
                                 </Link>
                             </TableCell>
-                            <TableCell className="hidden text-right font-mono text-sm text-foreground sm:table-cell">
-                                {formatCompactNumber(issue.records_count || 0)}
-                            </TableCell>
-                            <TableCell className="hidden text-right font-mono text-sm text-foreground lg:table-cell">
-                                {formatCompactNumber(issue.users_count || 0)}
-                            </TableCell>
-                            <TableCell className="hidden text-right text-xs whitespace-nowrap text-muted-foreground xl:table-cell">
-                                {issue.created_at
-                                    ? formatDistanceToNow(
-                                          new Date(issue.created_at),
-                                          { addSuffix: false },
-                                      ).replace('about ', '')
-                                    : '--'}
-                            </TableCell>
-                            <TableCell className="text-right text-xs font-medium whitespace-nowrap text-foreground">
-                                {issue.last_seen_at
-                                    ? formatDistanceToNow(
-                                          new Date(issue.last_seen_at),
-                                          { addSuffix: false },
-                                      ).replace('about ', '')
-                                    : '--'}
-                            </TableCell>
+                            <TableCell className="hidden text-right font-mono text-sm text-foreground sm:table-cell">{formatCompactNumber(issue.records_count || 0)}</TableCell>
+                            <TableCell className="hidden text-right font-mono text-sm text-foreground lg:table-cell">{formatCompactNumber(issue.users_count || 0)}</TableCell>
+                            <TableCell className="hidden text-right text-xs whitespace-nowrap text-muted-foreground xl:table-cell">{issue.created_at ? formatDistanceToNow(new Date(issue.created_at), { addSuffix: false }).replace('about ', '') : '--'}</TableCell>
+                            <TableCell className="text-right text-xs font-medium whitespace-nowrap text-foreground">{issue.last_seen_at ? formatDistanceToNow(new Date(issue.last_seen_at), { addSuffix: false }).replace('about ', '') : '--'}</TableCell>
                             <TableCell className="hidden pr-6 text-right sm:table-cell">
-                                <div className="flex justify-end">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <button className="group/avatar flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-dashed border-border bg-muted transition-all hover:border-primary/50">
-                                                {issue.assignee ? (
-                                                    <Avatar className="h-full w-full">
-                                                        <AvatarFallback className="bg-primary/10 text-[10px] text-primary uppercase">
-                                                            {issue.assignee.name.substring(
-                                                                0,
-                                                                2,
-                                                            )}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                ) : (
-                                                    <UserIcon className="h-3 w-3 text-muted-foreground group-hover/avatar:text-foreground" />
-                                                )}
-                                            </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent
-                                            className="w-48 border-border bg-popover text-popover-foreground"
-                                            align="end"
-                                        >
-                                            <DropdownMenuLabel className="text-[10px] tracking-widest text-muted-foreground uppercase">
-                                                Assign To
-                                            </DropdownMenuLabel>
-                                            <DropdownMenuSeparator className="bg-border" />
-                                            <DropdownMenuItem
-                                                onClick={() =>
-                                                    updateIssue(issue.id, {
-                                                        assigned_to: null,
-                                                    })
-                                                }
-                                                className="flex cursor-pointer items-center justify-between text-xs"
-                                            >
-                                                Unassigned
-                                                {!issue.assigned_to && (
-                                                    <Check className="h-3 w-3" />
-                                                )}
-                                            </DropdownMenuItem>
-                                            {team_members.map((member: any) => (
-                                                <DropdownMenuItem
-                                                    key={member.id}
-                                                    onClick={() =>
-                                                        updateIssue(issue.id, {
-                                                            assigned_to:
-                                                                member.id,
-                                                        })
-                                                    }
-                                                    className="flex cursor-pointer items-center justify-between text-xs"
-                                                >
-                                                    {member.name}
-                                                    {issue.assigned_to ===
-                                                        member.id && (
-                                                        <Check className="h-3 w-3" />
-                                                    )}
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
+                                <div className="flex justify-end"><DropdownMenu><DropdownMenuTrigger asChild><button className="group/avatar flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-dashed border-border bg-muted transition-all hover:border-primary/50">{issue.assignee ? <Avatar className="h-full w-full"><AvatarFallback className="bg-primary/10 text-[10px] text-primary uppercase">{issue.assignee.name.substring(0, 2)}</AvatarFallback></Avatar> : <UserIcon className="h-3 w-3 text-muted-foreground group-hover/avatar:text-foreground" />}</button></DropdownMenuTrigger><DropdownMenuContent className="w-48 border-border bg-popover text-popover-foreground" align="end"><DropdownMenuLabel className="text-[10px] tracking-widest text-muted-foreground uppercase">Assign To</DropdownMenuLabel><DropdownMenuSeparator className="bg-border" /><DropdownMenuItem onClick={() => updateIssue(issue.id, { assigned_to: null })} className="flex cursor-pointer items-center justify-between text-xs">Unassigned{!issue.assigned_to && <Check className="h-3 w-3" />}</DropdownMenuItem>{team_members.map((member: any) => <DropdownMenuItem key={member.id} onClick={() => updateIssue(issue.id, { assigned_to: member.id })} className="flex cursor-pointer items-center justify-between text-xs">{member.name}{issue.assigned_to === member.id && <Check className="h-3 w-3" />}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu></div>
                             </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
-
+            </div>
             <Pagination links={issues.links} meta={issues} />
         </div>
     );
