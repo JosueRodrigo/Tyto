@@ -3,8 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <meta name="description" content="Laraowl - Advanced Monitoring and Error Tracking for Laravel Applications.">
+        <meta name="description" content="Tyto - observability, incident detection and performance monitoring.">
         <meta name="keywords" content="laravel, monitoring, error tracking, performance, dashboard">
         <meta name="robots" content="noindex, nofollow">
 
@@ -27,16 +26,16 @@
         {{-- Inline style to set the HTML background color based on our theme in app.css --}}
         <style>
             html {
-                background-color: oklch(1 0 0);
+                background-color: oklch(0.975 0.008 285);
             }
 
             html.dark {
-                background-color: oklch(0.145 0 0);
+                background-color: #050510;
             }
         </style>
 
-        <link rel="icon" type="image/png" href="/logo.png">
-        <link rel="apple-touch-icon" href="/logo.png">
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <meta name="theme-color" content="#050510">
 
 
 

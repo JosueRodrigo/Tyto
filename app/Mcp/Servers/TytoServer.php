@@ -13,10 +13,10 @@ use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Attributes\Version;
 
-#[Name('laraowl')]
+#[Name('tyto')]
 #[Version('0.1.0')]
-#[Instructions('Browse laraowl projects, issues, and telemetry, and triage issues by updating status or adding comments. All data is scoped to the authenticated user\'s teams.')]
-class LaraowlServer extends Server
+#[Instructions('Browse Tyto projects, issues, and telemetry, and triage issues by updating status or adding comments. All data is scoped to the authenticated user\'s teams.')]
+class TytoServer extends Server
 {
     protected array $tools = [
         ListProjects::class,

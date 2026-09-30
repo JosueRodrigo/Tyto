@@ -226,7 +226,7 @@ test('the backfill lifts user_key and ip out of legacy payloads', function () {
 
     expect(Record::where('project_id', $project->id)->value('user_key'))->toBeNull();
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
 
     $record = Record::where('project_id', $project->id)->first();
 

@@ -72,6 +72,7 @@ class HandleInertiaRequests extends Middleware
                 $teamIds = $user->teams()->pluck('teams.id');
 
                 return Project::whereIn('team_id', $teamIds)
+                    ->with('media')
                     ->get(['id', 'team_id', 'name', 'slug']) ?? [];
             },
             'currentProject' => function () use ($request, $user) {

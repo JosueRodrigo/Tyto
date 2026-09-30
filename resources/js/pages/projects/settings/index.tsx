@@ -1238,6 +1238,11 @@ export default function ProjectSettings({
                                                                                                   .auth
                                                                                                   .user
                                                                                                   .email,
+                                                                                              smtp_port: 587,
+                                                                                              smtp_encryption:
+                                                                                                  'tls',
+                                                                                              from_name:
+                                                                                                  'Tyto Alerts',
                                                                                           }
                                                                                         : {},
                                                                             },
@@ -1331,13 +1336,33 @@ export default function ProjectSettings({
                                                                         : 'Off'}
                                                                 </Badge>
                                                             </div>
+                                                            {int.configuration_error && (
+                                                                <div className="mb-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-500">
+                                                                    These
+                                                                    credentials
+                                                                    were
+                                                                    encrypted
+                                                                    with a
+                                                                    different
+                                                                    application
+                                                                    key and
+                                                                    cannot be
+                                                                    recovered.
+                                                                    Edit this
+                                                                    connection
+                                                                    and enter
+                                                                    the secret
+                                                                    again.
+                                                                </div>
+                                                            )}
                                                             <div className="flex gap-2">
                                                                 <Button
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     disabled={
                                                                         testingId ===
-                                                                        int.id
+                                                                            int.id ||
+                                                                        int.configuration_error
                                                                     }
                                                                     onClick={() =>
                                                                         handleTestIntegration(
@@ -1443,31 +1468,86 @@ export default function ProjectSettings({
                                                     className="space-y-2"
                                                 >
                                                     <Label>{field.label}</Label>
-                                                    <Input
-                                                        type={field.type}
-                                                        value={
-                                                            intForm.data.data[
-                                                                field.name
-                                                            ] || ''
-                                                        }
-                                                        onChange={(e) =>
-                                                            intForm.setData(
-                                                                'data',
-                                                                {
-                                                                    ...intForm
-                                                                        .data
-                                                                        .data,
-                                                                    [field.name]:
-                                                                        e.target
-                                                                            .value,
-                                                                },
-                                                            )
-                                                        }
-                                                        placeholder={
-                                                            field.placeholder
-                                                        }
-                                                        className="border-border bg-muted"
-                                                    />
+                                                    {field.type === 'select' ? (
+                                                        <Select
+                                                            value={
+                                                                intForm.data
+                                                                    .data[
+                                                                    field.name
+                                                                ] || ''
+                                                            }
+                                                            onValueChange={(
+                                                                value,
+                                                            ) =>
+                                                                intForm.setData(
+                                                                    'data',
+                                                                    {
+                                                                        ...intForm
+                                                                            .data
+                                                                            .data,
+                                                                        [field.name]:
+                                                                            value,
+                                                                    },
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger className="border-border bg-muted">
+                                                                <SelectValue
+                                                                    placeholder={
+                                                                        field.placeholder
+                                                                    }
+                                                                />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {field.options?.map(
+                                                                    (
+                                                                        option: any,
+                                                                    ) => (
+                                                                        <SelectItem
+                                                                            key={
+                                                                                option.value
+                                                                            }
+                                                                            value={
+                                                                                option.value
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                option.label
+                                                                            }
+                                                                        </SelectItem>
+                                                                    ),
+                                                                )}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    ) : (
+                                                        <Input
+                                                            type={field.type}
+                                                            value={
+                                                                intForm.data
+                                                                    .data[
+                                                                    field.name
+                                                                ] || ''
+                                                            }
+                                                            onChange={(e) =>
+                                                                intForm.setData(
+                                                                    'data',
+                                                                    {
+                                                                        ...intForm
+                                                                            .data
+                                                                            .data,
+                                                                        [field.name]:
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                            placeholder={
+                                                                field.placeholder
+                                                            }
+                                                            className="border-border bg-muted"
+                                                        />
+                                                    )}
                                                 </div>
                                             ),
                                         )}
@@ -1915,7 +1995,7 @@ export default function ProjectSettings({
                                 </CardTitle>
                                 <CardDescription>
                                     Use these credentials to connect your
-                                    application to Laraowl.
+                                    application to Tyto.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -2183,7 +2263,7 @@ export default function ProjectSettings({
                                                 </span>
                                             </div>
                                             <p className="text-[10px] leading-relaxed text-muted-foreground">
-                                                Laraowl requires{' '}
+                                                Tyto requires{' '}
                                                 <strong>Global</strong> or{' '}
                                                 <strong>Specific Zone</strong>{' '}
                                                 access. If the connection fails,

@@ -34,7 +34,7 @@ WORKDIR /usr/share/caddy/html/
 COPY . .
 
 # Install dependencies with composer
-RUN composer validate --strict \
+RUN composer validate --strict --no-check-lock \
   && composer install \
   --no-interaction \
   --no-progress \
@@ -43,7 +43,7 @@ RUN composer validate --strict \
   && composer clear-cache
 
 # Install NPM dependencies and build frontend assets
-RUN npm install \
+RUN npm ci \
   && npm run build \
   && rm -rf node_modules \
   && npm cache clean --force

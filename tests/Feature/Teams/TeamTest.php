@@ -3,6 +3,7 @@
 use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 
 test('the teams index page can be rendered', function () {
     $user = User::factory()->create();
@@ -81,6 +82,25 @@ test('teams can be updated by owners', function () {
         'id' => $team->id,
         'name' => 'Updated Name',
     ]);
+});
+
+test('team owners can upload a logo', function () {
+    $user = User::factory()->create();
+    $team = Team::factory()->create();
+
+    $team->members()->attach($user, ['role' => TeamRole::Owner->value]);
+
+    $this
+        ->actingAs($user)
+        ->post(route('teams.update', $team), [
+            '_method' => 'PATCH',
+            'name' => $team->name,
+            'logo' => UploadedFile::fake()->image('team-logo.png', 256, 256),
+        ])
+        ->assertRedirect();
+
+    expect($team->fresh()->getFirstMedia('logo'))->not->toBeNull()
+        ->and($user->toUserTeam($team->fresh())->logoUrl)->not->toBeNull();
 });
 
 test('teams cannot be updated by members', function () {

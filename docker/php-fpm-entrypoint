@@ -8,7 +8,9 @@ main() {
     else
         prepare_storage
         wait_for_db
-        run_migrations
+        if [ "${TYTO_RUN_MIGRATIONS:-false}" = "true" ]; then
+            run_migrations
+        fi
         optimize_app
         run_server "$@"
     fi

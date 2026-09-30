@@ -7,14 +7,14 @@ use App\Support\Release;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
-class UpdateLaraOwl extends Command
+class UpdateTyto extends Command
 {
-    protected $signature = 'laraowl:update
+    protected $signature = 'tyto:update
                             {--check : Report whether an update is available without installing it}
                             {--dry-run : Print the steps that would run without executing them}
                             {--force : Skip the confirmation prompt and the working tree check}';
 
-    protected $description = 'Check for and install the latest LaraOwl release';
+    protected $description = 'Check for and install the latest Tyto release';
 
     /**
      * How long any single update step may run before it is killed.
@@ -24,7 +24,7 @@ class UpdateLaraOwl extends Command
     public function handle(UpdateService $updates): int
     {
         if (! $updates->enabled()) {
-            $this->error('Update checks are disabled. Set LARAOWL_UPDATE_CHECK=true to enable them.');
+            $this->error('Update checks are disabled. Set TYTO_UPDATE_CHECK=true to enable them.');
 
             return self::FAILURE;
         }
@@ -39,18 +39,18 @@ class UpdateLaraOwl extends Command
         }
 
         if (! $release->isNewerThanCurrent()) {
-            $this->info("LaraOwl is up to date (v{$current}).");
+            $this->info("Tyto is up to date (v{$current}).");
 
             return self::SUCCESS;
         }
 
         $this->newLine();
-        $this->info("LaraOwl v{$release->version} is available. You are running v{$current}.");
+        $this->info("Tyto v{$release->version} is available. You are running v{$current}.");
         $this->line($release->url);
         $this->newLine();
 
         if ($this->option('check')) {
-            $this->comment('Run `php artisan laraowl:update` to install it.');
+            $this->comment('Run `php artisan tyto:update` to install it.');
 
             return self::SUCCESS;
         }
@@ -137,7 +137,7 @@ class UpdateLaraOwl extends Command
         }
 
         $this->newLine();
-        $this->info("LaraOwl has been updated to v{$release->version}.");
+        $this->info("Tyto has been updated to v{$release->version}.");
 
         return self::SUCCESS;
     }
@@ -158,7 +158,7 @@ class UpdateLaraOwl extends Command
             'Installing JS dependencies' => [$this->binary('npm'), 'ci'],
             'Building assets' => [$this->binary('npm'), 'run', 'build'],
             'Running migrations' => [$php, $artisan, 'migrate', '--force'],
-            'Backfilling dashboard rollups' => [$php, $artisan, 'laraowl:rollups:backfill', '--missing', '--no-interaction'],
+            'Backfilling dashboard rollups' => [$php, $artisan, 'tyto:rollups:backfill', '--missing', '--no-interaction'],
             'Clearing caches' => [$php, $artisan, 'optimize:clear'],
             'Restarting queue workers' => [$php, $artisan, 'queue:restart'],
         ];
@@ -169,6 +169,6 @@ class UpdateLaraOwl extends Command
      */
     protected function binary(string $name): string
     {
-        return (string) config("laraowl.binaries.{$name}");
+        return (string) config("tyto.binaries.{$name}");
     }
 }

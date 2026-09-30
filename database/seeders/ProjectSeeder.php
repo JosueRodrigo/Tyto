@@ -14,7 +14,7 @@ class ProjectSeeder extends Seeder
     public function run(): void
     {
         $user = User::updateOrCreate(
-            ['email' => 'admin@laraowl.com'],
+            ['email' => 'admin@tyto.local'],
             ['name' => 'Admin', 'password' => bcrypt('password')]
         );
 
@@ -33,8 +33,8 @@ class ProjectSeeder extends Seeder
             ['slug' => 'test-project'],
             [
                 'team_id' => $team->id,
-                'name' => 'Laraowl Test',
-                'api_token' => 'laraowl_test_token',
+                'name' => 'Tyto Test',
+                'api_token' => 'tyto_test_token',
                 'url' => 'http://localhost:8000',
             ]
         );

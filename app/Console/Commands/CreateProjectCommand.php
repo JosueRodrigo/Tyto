@@ -11,7 +11,7 @@ class CreateProjectCommand extends Command
 {
     use ResolvesConsoleIdentifiers;
 
-    protected $signature = 'laraowl:projects:create
+    protected $signature = 'tyto:projects:create
                             {team : Team ID or slug}
                             {name : The project name}
                             {--url= : The project URL, used for uptime checks}

@@ -193,7 +193,7 @@ export default function CreateProjectModal({ children }: PropsWithChildren) {
                                         onChange={(e) =>
                                             setData('url', e.target.value)
                                         }
-                                        placeholder="https://app.laraowl.com"
+                                        placeholder="https://app.example.com"
                                         className="h-10 rounded-lg border-border bg-muted/30 focus:border-border focus:ring-0"
                                     />
                                     <InputError message={errors.url} />

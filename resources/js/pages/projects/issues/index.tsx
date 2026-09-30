@@ -1,28 +1,41 @@
-﻿import { Head, usePage, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
+    AlertTriangle,
+    CheckCircle2,
+    Clock3,
     Search,
-    TrendingUp,
-    CheckCircle,
-    Clock,
-    AlertCircle,
-    LayoutGrid,
+    ShieldAlert,
+    UserRoundX,
 } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
-import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
-import { EmptyState } from '@/components/empty-state';
+import { useCallback, useEffect, useState } from 'react';
+import { Area, AreaChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { IssueTable } from '@/components/issue-table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MetricCard } from '@/components/observability/metric-card';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { useLiveReload } from '@/hooks/use-live-reload';
 import AppLayout from '@/layouts/app-layout';
 import { formatCompactNumber } from '@/lib/utils';
+
+type IssueFilters = {
+    status?: string;
+    priority?: string;
+    search?: string;
+};
+
+type IssueCounts = {
+    open?: number;
+    resolved?: number;
+    ignored?: number;
+    unassigned?: number;
+    critical?: number;
+};
 
 export default function Issues({
     issues,
@@ -32,270 +45,227 @@ export default function Issues({
     performance,
 }: {
     issues: any;
-    filters: any;
-    counts: any;
-    team_members: any;
+    filters: IssueFilters;
+    counts: IssueCounts;
+    team_members: any[];
     performance: any;
 }) {
     const { props }: any = usePage();
     const teamSlug = props.currentTeam?.slug || props.current_team?.slug;
-    const currentProject = props.current_project || props.currentProject;
-    const projectSlug =
-        props.currentProject?.slug || props.current_project?.slug;
-
+    const project = props.current_project || props.currentProject;
     const [search, setSearch] = useState(filters.search || '');
 
-    useLiveReload(currentProject?.id);
-    const [view, setView] = useState('exceptions'); // 'exceptions' or 'performance'
-
-    const data = issues.data || [];
+    useLiveReload(project?.id);
 
     const updateFilter = useCallback(
-        (newFilters: any) => {
+        (next: IssueFilters) => {
             router.get(
-                `/${teamSlug}/${projectSlug}/issues`,
-                {
-                    ...filters,
-                    ...newFilters,
-                },
+                `/${teamSlug}/${project?.slug}/issues`,
+                { ...filters, ...next },
                 {
                     preserveState: true,
+                    preserveScroll: true,
                     replace: true,
                 },
             );
         },
-        [teamSlug, projectSlug, filters],
+        [filters, project?.slug, teamSlug],
     );
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+        const timeout = window.setTimeout(() => {
             if (search !== (filters.search || '')) {
                 updateFilter({ search });
             }
-        }, 500);
+        }, 400);
 
-        return () => clearTimeout(timer);
-    }, [search, filters.search, updateFilter]);
+        return () => window.clearTimeout(timeout);
+    }, [filters.search, search, updateFilter]);
+
+    const statuses = [
+        { value: 'open', label: 'Open', count: counts.open },
+        { value: 'unassigned', label: 'Unassigned', count: counts.unassigned },
+        { value: 'mine', label: 'Assigned to me' },
+        { value: 'resolved', label: 'Resolved', count: counts.resolved },
+        { value: 'ignored', label: 'Ignored', count: counts.ignored },
+    ];
 
     return (
         <>
-            <Head title="Issues" />
-
-            <div className="mb-6 space-y-4">
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                    <div className="scrollbar-hide flex w-fit items-center gap-2 overflow-x-auto rounded-lg border border-border bg-muted p-1">
-                        <button
-                            onClick={() => setView('exceptions')}
-                            className={`flex-1 rounded-md px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-all sm:flex-none ${view === 'exceptions' ? 'border border-border bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`}
-                        >
-                            Exceptions
-                        </button>
-                        <button
-                            onClick={() => setView('performance')}
-                            className={`flex-1 rounded-md px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-all sm:flex-none ${view === 'performance' ? 'border border-border bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`}
-                        >
-                            Performance
-                        </button>
-                    </div>
-
-                    {view === 'exceptions' && (
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                placeholder="Search issues..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="h-9 w-full border-input bg-muted pl-10 text-sm text-foreground focus-visible:ring-primary"
-                            />
+            <Head title="Incident center" />
+            <div className="space-y-6">
+                <section className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <div className="mb-2 flex items-center gap-2 text-xs font-extrabold tracking-[0.12em] text-red-600 uppercase dark:text-red-300">
+                            <ShieldAlert className="size-4" /> Incident center
                         </div>
-                    )}
-                </div>
+                        <h1 className="text-3xl font-black tracking-[-0.04em] text-foreground">
+                            Triage what matters
+                        </h1>
+                        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                            Prioritize recurring failures, assign ownership and
+                            preserve the operational timeline from detection to
+                            resolution.
+                        </p>
+                    </div>
+                    <div className="relative w-full lg:w-80">
+                        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder="Search title or error message"
+                            className="h-10 bg-card pl-10"
+                        />
+                    </div>
+                </section>
 
-                {view === 'exceptions' && (
-                    <div className="scrollbar-hide flex w-fit items-center gap-1 overflow-x-auto rounded-lg border border-border bg-muted p-1">
-                        {[
-                            'open',
-                            'unassigned',
-                            'mine',
-                            'resolved',
-                            'ignored',
-                        ].map((status) => (
-                            <button
-                                key={status}
-                                onClick={() => updateFilter({ status })}
-                                className={`rounded-md px-4 py-1.5 text-[11px] font-medium whitespace-nowrap capitalize transition-all sm:text-xs ${filters.status === status ? 'border border-border bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted'}`}
-                            >
-                                {status}
-                                {(status === 'open' ||
-                                    status === 'unassigned') &&
-                                    counts[status] !== undefined && (
-                                        <span className="ml-1 text-[10px] opacity-50">
-                                            {formatCompactNumber(
-                                                counts[status],
-                                            )}
+                <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <MetricCard
+                        label="Open incidents"
+                        value={formatCompactNumber(counts.open || 0)}
+                        detail={`${formatCompactNumber(counts.critical || 0)} critical priority`}
+                        icon={AlertTriangle}
+                        tone={
+                            (counts.critical || 0) > 0 ? 'critical' : 'warning'
+                        }
+                    />
+                    <MetricCard
+                        label="Unassigned"
+                        value={formatCompactNumber(counts.unassigned || 0)}
+                        detail="Incidents without an owner"
+                        icon={UserRoundX}
+                        tone={
+                            (counts.unassigned || 0) > 0 ? 'warning' : 'healthy'
+                        }
+                    />
+                    <MetricCard
+                        label="Resolution rate"
+                        value={`${performance.resolution_rate || 0}%`}
+                        detail={`${formatCompactNumber(performance.total_resolved || 0)} resolved incidents`}
+                        icon={CheckCircle2}
+                        tone="healthy"
+                    />
+                    <MetricCard
+                        label="Mean resolution"
+                        value={`${performance.avg_resolution_time || 0}h`}
+                        detail="Average time to resolve"
+                        icon={Clock3}
+                        tone="neutral"
+                    />
+                </section>
+
+                <section className="tyto-panel overflow-hidden">
+                    <div className="flex flex-col gap-4 border-b border-border/70 p-4 xl:flex-row xl:items-center xl:justify-between">
+                        <div className="scrollbar-hide flex items-center gap-1 overflow-x-auto">
+                            {statuses.map((status) => (
+                                <button
+                                    key={status.value}
+                                    type="button"
+                                    onClick={() =>
+                                        updateFilter({ status: status.value })
+                                    }
+                                    className={`rounded-lg px-3 py-2 text-xs font-bold whitespace-nowrap transition-colors ${filters.status === status.value ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {status.label}
+                                    {status.count !== undefined && (
+                                        <span className="ml-1.5 opacity-60">
+                                            {formatCompactNumber(status.count)}
                                         </span>
                                     )}
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            <div className="flex flex-col gap-6">
-                {view === 'exceptions' ? (
-                    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
-                        {data.length > 0 ? (
-                            <IssueTable
-                                issues={issues}
-                                team_members={team_members}
-                            />
-                        ) : (
-                            <div className="p-12">
-                                <EmptyState
-                                    title="No Issues Found"
-                                    description="No exceptions or performance issues match your current filters. Looking good!"
-                                    icon={LayoutGrid}
-                                />
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                            <Card className="border-border bg-card">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <TrendingUp className="h-5 w-5 text-blue-500" />
-                                        <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-500">
-                                            EFFICIENCY
-                                        </span>
-                                    </div>
-                                    <div className="text-3xl font-bold text-foreground">
-                                        {performance.resolution_rate}%
-                                    </div>
-                                    <div className="mt-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                                        Resolution Rate
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-border bg-card">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <Clock className="h-5 w-5 text-orange-500" />
-                                    </div>
-                                    <div className="text-3xl font-bold text-foreground">
-                                        {performance.avg_resolution_time}h
-                                    </div>
-                                    <div className="mt-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                                        Avg Time to Resolve
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-border bg-card">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <CheckCircle className="h-5 w-5 text-emerald-500" />
-                                    </div>
-                                    <div className="text-3xl font-bold text-foreground">
-                                        {formatCompactNumber(
-                                            performance.total_resolved,
-                                        )}
-                                    </div>
-                                    <div className="mt-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                                        Total Resolved
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-border bg-card">
-                                <CardContent className="p-6">
-                                    <div className="mb-4 flex items-center justify-between">
-                                        <AlertCircle className="h-5 w-5 text-red-500" />
-                                    </div>
-                                    <div className="text-3xl font-bold text-foreground">
-                                        {formatCompactNumber(
-                                            performance.open_issues,
-                                        )}
-                                    </div>
-                                    <div className="mt-1 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-                                        Currently Open
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                </button>
+                            ))}
                         </div>
-
-                        <Card className="overflow-hidden border-border bg-card shadow-2xl">
-                            <CardHeader className="p-6 pb-0">
-                                <CardTitle className="flex items-center gap-2 text-sm font-bold tracking-widest text-foreground uppercase">
-                                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                                    Issue Trends (30 Days)
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="mt-6 h-[300px] w-full px-4">
-                                    <ResponsiveContainer
-                                        width="100%"
-                                        height="100%"
-                                    >
-                                        <AreaChart
-                                            data={performance.daily_trend}
-                                        >
-                                            <defs>
-                                                <linearGradient
-                                                    id="colorCount"
-                                                    x1="0"
-                                                    y1="0"
-                                                    x2="0"
-                                                    y2="1"
-                                                >
-                                                    <stop
-                                                        offset="5%"
-                                                        stopColor="#3b82f6"
-                                                        stopOpacity={0.3}
-                                                    />
-                                                    <stop
-                                                        offset="95%"
-                                                        stopColor="#3b82f6"
-                                                        stopOpacity={0}
-                                                    />
-                                                </linearGradient>
-                                            </defs>
-                                            <XAxis dataKey="date" hide />
-                                            <YAxis hide />
-                                            <Tooltip
-                                                contentStyle={{
-                                                    backgroundColor:
-                                                        'var(--card)',
-                                                    border: '1px solid var(--border)',
-                                                    borderRadius: '8px',
-                                                    fontSize: '12px',
-                                                }}
-                                                itemStyle={{
-                                                    color: 'var(--foreground)',
-                                                }}
-                                            />
-                                            <Area
-                                                type="monotone"
-                                                dataKey="count"
-                                                stroke="#3b82f6"
-                                                fillOpacity={1}
-                                                fill="url(#colorCount)"
-                                                strokeWidth={2}
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <Select
+                            value={filters.priority || 'all'}
+                            onValueChange={(priority) =>
+                                updateFilter({ priority })
+                            }
+                        >
+                            <SelectTrigger className="h-9 w-full bg-background xl:w-44">
+                                <SelectValue placeholder="All priorities" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    All priorities
+                                </SelectItem>
+                                <SelectItem value="critical">
+                                    Critical
+                                </SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="none">
+                                    No priority
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                )}
+                    <IssueTable issues={issues} team_members={team_members} />
+                </section>
+
+                <section className="tyto-panel p-5">
+                    <div className="mb-5 flex items-start justify-between">
+                        <div>
+                            <h2 className="text-sm font-extrabold text-foreground">
+                                Incident creation trend
+                            </h2>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                New grouped incidents during the last 30 days
+                            </p>
+                        </div>
+                        <span className="text-xs font-bold text-muted-foreground">
+                            30 days
+                        </span>
+                    </div>
+                    <div className="h-40">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={performance.daily_trend || []}>
+                                <defs>
+                                    <linearGradient
+                                        id="issueTrend"
+                                        x1="0"
+                                        y1="0"
+                                        x2="0"
+                                        y2="1"
+                                    >
+                                        <stop
+                                            offset="0%"
+                                            stopColor="var(--chart-2)"
+                                            stopOpacity={0.3}
+                                        />
+                                        <stop
+                                            offset="100%"
+                                            stopColor="var(--chart-2)"
+                                            stopOpacity={0}
+                                        />
+                                    </linearGradient>
+                                </defs>
+                                <Tooltip
+                                    contentStyle={{
+                                        borderRadius: 10,
+                                        border: '1px solid var(--border)',
+                                        background: 'var(--popover)',
+                                        fontSize: 12,
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="count"
+                                    stroke="var(--chart-2)"
+                                    strokeWidth={2}
+                                    fill="url(#issueTrend)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </section>
             </div>
         </>
     );
 }
 
-Issues.layout = (page: any) => (
-    <AppLayout children={page} breadcrumbs={[{ title: 'Issues', href: '#' }]} />
+Issues.layout = (page: React.ReactNode) => (
+    <AppLayout breadcrumbs={[{ title: 'Incident center', href: '#' }]}>
+        {page}
+    </AppLayout>
 );

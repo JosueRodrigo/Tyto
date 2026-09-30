@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use App\Mcp\Tools\ListProjects;
 use App\Models\Project;
 use App\Models\User;
@@ -12,7 +12,7 @@ it('lists only projects in the user\'s teams', function () {
     $other = User::factory()->create();
     Project::factory()->for($other->currentTeam)->create(['name' => 'Theirs']);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(ListProjects::class)
         ->assertOk()
         ->assertSee('Mine')

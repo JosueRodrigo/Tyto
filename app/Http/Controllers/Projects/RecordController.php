@@ -144,6 +144,41 @@ class RecordController extends Controller
     }
 
     /**
+     * Search raw signals across telemetry domains through indexed columns.
+     */
+    public function telemetry(Request $request, Team $current_team, Project $project): Response
+    {
+        $validated = $request->validate([
+            'type' => 'nullable|string|in:all,request,exception,query,job-attempt,queued-job,log,scheduled-task,outgoing-request,cache-event,mail,notification',
+            'search' => 'nullable|string|max:200',
+            'trace_id' => 'nullable|string|max:100',
+            'period' => 'nullable|string|in:1h,24h,7d,14d,30d,custom',
+            'from' => 'nullable|required_if:period,custom|date',
+            'to' => 'nullable|required_if:period,custom|date|after_or_equal:from',
+        ]);
+        $period = $validated['period'] ?? '1h';
+        $from = $validated['from'] ?? null;
+        $to = $validated['to'] ?? null;
+
+        return Inertia::render('projects/telemetry/index', [
+            'records' => $this->recordService->getTelemetryRecords(
+                $project,
+                $validated['type'] ?? 'all',
+                $validated['search'] ?? null,
+                $validated['trace_id'] ?? null,
+                $period,
+                $from,
+                $to,
+            ),
+            'filters' => array_merge(['type' => 'all'], $validated),
+            'stats' => $this->recordService->getQuickStats($project, $period, $from, $to),
+            'period' => $period,
+            'from' => $from,
+            'to' => $to,
+        ]);
+    }
+
+    /**
      * Drill-down Detail Handlers (Hashed)
      */
     public function showDetails(Request $request, Team $current_team, Project $project, string $hash): Response

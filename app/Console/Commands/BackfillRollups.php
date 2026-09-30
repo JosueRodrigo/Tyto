@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class BackfillRollups extends Command
 {
-    protected $signature = 'laraowl:rollups:backfill
+    protected $signature = 'tyto:rollups:backfill
                             {--project= : Restrict the rebuild to one project id or slug}
                             {--missing : Only rebuild projects that have records but no rollups yet}
                             {--since= : Only rebuild buckets at or after this datetime}

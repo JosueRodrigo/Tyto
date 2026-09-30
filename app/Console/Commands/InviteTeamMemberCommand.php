@@ -18,7 +18,7 @@ class InviteTeamMemberCommand extends Command
 {
     use ResolvesConsoleIdentifiers;
 
-    protected $signature = 'laraowl:teams:invite
+    protected $signature = 'tyto:teams:invite
                             {team : Team ID or slug}
                             {email : Email address to invite}
                             {--role=member : Role to assign (member or admin)}

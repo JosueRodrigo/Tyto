@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class VerifyLaraowlToken
+class VerifyTytoToken
 {
     /**
      * Handle an incoming request.
@@ -16,7 +16,7 @@ class VerifyLaraowlToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->header('X-Laraowl-Token') ?? $request->bearerToken();
+        $token = $request->header('X-Tyto-Token') ?? $request->bearerToken();
 
         if (! $token) {
             abort(401, 'API Token is missing.');

@@ -10,6 +10,7 @@ use App\Services\IssueService;
 use App\Support\ExceptionTrace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,7 +28,7 @@ class IssueController extends Controller
      */
     public function index(Request $request, Team $current_team, Project $project): Response
     {
-        $filters = $request->only(['status', 'search']);
+        $filters = $request->only(['status', 'priority', 'search']);
 
         return Inertia::render('projects/issues/index', [
             'issues' => $this->issueService->getPaginatedIssues($project, $filters),
@@ -63,7 +64,11 @@ class IssueController extends Controller
         $validated = $request->validate([
             'status' => 'sometimes|string|in:open,resolved,ignored',
             'priority' => 'sometimes|string|in:none,low,medium,high,critical',
-            'assigned_to' => 'sometimes|nullable|exists:users,id',
+            'assigned_to' => [
+                'sometimes',
+                'nullable',
+                Rule::exists('team_members', 'user_id')->where('team_id', $current_team->id),
+            ],
         ]);
 
         $this->issueService->updateIssue($issue, $validated);
@@ -72,11 +77,35 @@ class IssueController extends Controller
     }
 
     /**
+     * Update multiple issues from the incident center.
+     */
+    public function bulkUpdate(Request $request, Team $current_team, Project $project): RedirectResponse
+    {
+        $validated = $request->validate([
+            'issue_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'issue_ids.*' => ['required', 'integer', 'distinct'],
+            'status' => ['required', 'string', 'in:resolved,ignored'],
+        ]);
+
+        $issues = $project->issues()
+            ->whereIn('id', $validated['issue_ids'])
+            ->get();
+
+        abort_if($issues->count() !== count($validated['issue_ids']), 422, 'One or more issues do not belong to this project.');
+
+        foreach ($issues as $issue) {
+            $this->issueService->updateIssue($issue, ['status' => $validated['status']]);
+        }
+
+        return back()->with('success', $issues->count().' issues updated successfully.');
+    }
+
+    /**
      * Add a comment/activity to the issue.
      */
     public function comment(Request $request, Team $current_team, Project $project, Issue $issue): RedirectResponse
     {
-        $validated = $request->validate(['comment' => 'required|string']);
+        $validated = $request->validate(['comment' => 'required|string|max:5000']);
 
         $this->issueService->addComment($issue, $validated['comment']);
 

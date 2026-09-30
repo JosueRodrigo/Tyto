@@ -9,7 +9,7 @@ class IssueMcpToken extends Command
 {
     use ResolvesConsoleIdentifiers;
 
-    protected $signature = 'laraowl:mcp-token {user : User id or email} {--name=mcp : Token name}';
+    protected $signature = 'tyto:mcp-token {user : User id or email} {--name=mcp : Token name}';
 
     protected $description = 'Issue a Sanctum personal access token for MCP access';
 

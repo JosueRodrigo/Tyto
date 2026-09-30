@@ -33,7 +33,7 @@ test('a backfill rebuilds exactly what live ingestion would have written', funct
     RecordRollup::where('project_id', $project->id)->delete();
     RecordUserBucket::where('project_id', $project->id)->delete();
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
 
     expect(rollupSnapshot($project))->toEqual($live)
         ->and(RecordUserBucket::where('project_id', $project->id)->count())->toBe($liveUsers);
@@ -47,10 +47,10 @@ test('running the backfill twice does not double count', function () {
         ['t' => 'request', 'status_code' => 200, 'duration' => 10, 'user' => '1'],
     ]);
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
     $once = rollupSnapshot($project);
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
 
     // The live path increments, so a replay that did not clear first would
     // silently accumulate on every run.
@@ -70,7 +70,7 @@ test('the backfill can be limited to one project', function () {
 
     RecordRollup::query()->delete();
 
-    $this->artisan('laraowl:rollups:backfill', ['--project' => $mine->slug])->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill', ['--project' => $mine->slug])->assertExitCode(0);
 
     expect(RecordRollup::where('project_id', $mine->id)->exists())->toBeTrue()
         ->and(RecordRollup::where('project_id', $theirs->id)->exists())->toBeFalse();
@@ -87,7 +87,7 @@ test('--missing rebuilds only projects whose rollups are empty', function () {
     // Simulate the upgrade: raw records survive, the new tables start empty.
     RecordRollup::where('project_id', $upgraded->id)->delete();
 
-    $this->artisan('laraowl:rollups:backfill', ['--missing' => true])->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill', ['--missing' => true])->assertExitCode(0);
 
     expect(RecordRollup::where('project_id', $upgraded->id)->exists())->toBeTrue();
 
@@ -99,7 +99,7 @@ test('--missing is a no-op once every project has rollups', function () {
     $project = Project::factory()->create();
     app(IngestService::class)->ingest($project, [['t' => 'request', 'status_code' => 200]]);
 
-    $this->artisan('laraowl:rollups:backfill', ['--missing' => true])
+    $this->artisan('tyto:rollups:backfill', ['--missing' => true])
         ->expectsOutputToContain('Every project already has rollups')
         ->assertExitCode(0);
 
@@ -109,7 +109,7 @@ test('--missing is a no-op once every project has rollups', function () {
 test('a project with no records in range is skipped cleanly', function () {
     Project::factory()->create();
 
-    $this->artisan('laraowl:rollups:backfill')
+    $this->artisan('tyto:rollups:backfill')
         ->expectsOutputToContain('no records in range')
         ->assertExitCode(0);
 
@@ -129,7 +129,7 @@ test('the backfill buckets a record by the minute it was created', function () {
         'created_at' => $createdAt,
     ]);
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
 
     $rollup = RecordRollup::where('project_id', $project->id)->first();
 

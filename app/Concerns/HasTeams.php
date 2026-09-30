@@ -136,6 +136,7 @@ trait HasTeams
     public function toUserTeams(bool $includeCurrent = false): Collection
     {
         return $this->teams()
+            ->with('media')
             ->get()
             ->map(fn (Team $team) => ! $includeCurrent && $this->isCurrentTeam($team) ? null : $this->toUserTeam($team))
             ->filter()
@@ -157,6 +158,7 @@ trait HasTeams
             role: $role?->value,
             roleLabel: $role?->label(),
             isCurrent: $this->isCurrentTeam($team),
+            logoUrl: $team->logo_url,
         );
     }
 

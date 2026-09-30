@@ -119,7 +119,7 @@ test('the backfill lifts trace_id out of legacy payloads', function () {
 
     expect(Record::where('project_id', $project->id)->value('trace_id'))->toBeNull();
 
-    $this->artisan('laraowl:rollups:backfill')->assertExitCode(0);
+    $this->artisan('tyto:rollups:backfill')->assertExitCode(0);
 
     expect(Record::where('project_id', $project->id)->value('trace_id'))->toBe('legacy-trace');
 });

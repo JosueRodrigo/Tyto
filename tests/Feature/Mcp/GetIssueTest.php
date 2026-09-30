@@ -1,6 +1,6 @@
 <?php
 
-use App\Mcp\Servers\LaraowlServer;
+use App\Mcp\Servers\TytoServer;
 use App\Mcp\Tools\GetIssue;
 use App\Models\Issue;
 use App\Models\Project;
@@ -18,7 +18,7 @@ it('returns issue detail with sanitized record payloads', function () {
         'payload' => ['message' => 'Boom', 'authorization' => 'Bearer leak-me'],
     ]);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(GetIssue::class, ['issue' => $issue->id])
         ->assertOk()
         ->assertSee('Boom')
@@ -32,7 +32,7 @@ it('refuses an issue outside the user\'s teams', function () {
     $project = Project::factory()->for($other->currentTeam)->create();
     $issue = Issue::create(['project_id' => $project->id, 'hash' => 'h', 'type' => 'exception', 'title' => 'Secret', 'message' => '', 'status' => 'open', 'last_seen_at' => now()]);
 
-    LaraowlServer::actingAs($user)
+    TytoServer::actingAs($user)
         ->tool(GetIssue::class, ['issue' => $issue->id])
         ->assertHasErrors();
 });

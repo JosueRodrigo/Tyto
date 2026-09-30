@@ -1,17 +1,18 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laraowl/laraowl",
+    "name": "tyto/tyto",
     "type": "project",
-    "description": "LaraOwl - The ultimate open-source, self-hosted monitoring platform for Laravel.",
+    "description": "Tyto - open-source, self-hosted application observability for Laravel.",
     "keywords": [
         "laravel",
-        "framework"
+        "observability",
+        "monitoring"
     ],
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "Abdelmjid Saber",
-            "homepage": "https://github.com/megoxv"
+            "name": "Josué Vieira Gomes",
+            "homepage": "https://integrad.com.br"
         }
     ],
     "require": {

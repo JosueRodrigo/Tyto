@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\Projects\AlertRuleController;
 use App\Http\Controllers\Projects\FirewallController;
+use App\Http\Controllers\Projects\HeartbeatController;
 use App\Http\Controllers\Projects\IntegrationController;
 use App\Http\Controllers\Projects\IssueController;
 use App\Http\Controllers\Projects\ProjectController;
 use App\Http\Controllers\Projects\RecordController;
+use App\Http\Controllers\Projects\StatusPageController;
 use App\Http\Controllers\Projects\ThresholdController;
+use App\Http\Controllers\Projects\UptimeController;
 use App\Http\Controllers\Teams\TeamController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Middleware\EnsureProjectExists;
@@ -14,6 +17,8 @@ use App\Http\Middleware\EnsureTeamMembership;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::get('status/{slug}', [StatusPageController::class, 'show'])->name('status.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function (Request $request) {
@@ -45,9 +50,12 @@ Route::prefix('{current_team}/{project}')
     ->group(function () {
         Route::get('dashboard', [RecordController::class, 'index'])->name('dashboard');
 
+        Route::get('telemetry', [RecordController::class, 'telemetry'])->name('telemetry');
+
         // Issues
         Route::get('issues', [IssueController::class, 'index'])->name('issues');
         Route::get('issues/{issue}', [IssueController::class, 'show'])->name('issues.show');
+        Route::patch('issues/bulk', [IssueController::class, 'bulkUpdate'])->name('issues.bulk-update');
         Route::patch('issues/{issue}', [IssueController::class, 'update'])->name('issues.update');
         Route::post('issues/{issue}/comments', [IssueController::class, 'comment'])->name('issues.comment');
 
@@ -74,7 +82,8 @@ Route::prefix('{current_team}/{project}')
         Route::get('notifications', [RecordController::class, 'index'])->name('notifications');
         Route::get('notifications/channels/{hash}', [RecordController::class, 'showNotificationDetails'])->name('notifications.show');
 
-        Route::get('uptime', [RecordController::class, 'index'])->name('uptime');
+        Route::get('uptime', [UptimeController::class, 'index'])->name('uptime');
+        Route::get('heartbeats', [HeartbeatController::class, 'index'])->name('heartbeats');
 
         Route::get('mail', [RecordController::class, 'index'])->name('mail');
         Route::get('mail/mailables/{hash}', [RecordController::class, 'showMailDetails'])->name('mail.show');
@@ -115,6 +124,7 @@ Route::prefix('{current_team}/{project}')
         Route::post('alerts', [AlertRuleController::class, 'store'])->name('alerts.store');
         Route::patch('alerts/{rule}', [AlertRuleController::class, 'update'])->name('alerts.update');
         Route::delete('alerts/{rule}', [AlertRuleController::class, 'destroy'])->name('alerts.destroy');
+        Route::post('alerts/deliveries/{delivery}/retry', [AlertRuleController::class, 'retry'])->name('alerts.deliveries.retry');
 
         // Thresholds
         Route::post('thresholds', [ThresholdController::class, 'store'])->name('thresholds.store');
@@ -125,6 +135,8 @@ Route::prefix('{current_team}/{project}')
         Route::delete('/', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
         Route::get('settings', [IntegrationController::class, 'index'])->name('project.settings');
+        Route::get('status-page', [StatusPageController::class, 'edit'])->name('status-page.edit');
+        Route::patch('status-page', [StatusPageController::class, 'update'])->name('status-page.update');
     });
 
 Route::prefix('{current_team}')

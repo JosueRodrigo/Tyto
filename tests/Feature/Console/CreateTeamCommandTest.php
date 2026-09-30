@@ -6,7 +6,7 @@ use App\Models\User;
 test('a team can be created for an existing owner by email', function () {
     $owner = User::factory()->create(['email' => 'owner@example.com']);
 
-    $this->artisan('laraowl:teams:create', ['name' => 'Acme Inc', 'owner' => 'owner@example.com'])
+    $this->artisan('tyto:teams:create', ['name' => 'Acme Inc', 'owner' => 'owner@example.com'])
         ->assertExitCode(0);
 
     $team = Team::where('name', 'Acme Inc')->firstOrFail();
@@ -19,7 +19,7 @@ test('a team can be created for an existing owner by email', function () {
 test('a team can be created for an existing owner by id', function () {
     $owner = User::factory()->create();
 
-    $this->artisan('laraowl:teams:create', ['name' => 'Acme Inc', 'owner' => (string) $owner->id])
+    $this->artisan('tyto:teams:create', ['name' => 'Acme Inc', 'owner' => (string) $owner->id])
         ->assertExitCode(0);
 
     $this->assertDatabaseHas('teams', ['name' => 'Acme Inc']);
@@ -28,7 +28,7 @@ test('a team can be created for an existing owner by id', function () {
 test('a team can be marked personal', function () {
     $owner = User::factory()->create();
 
-    $this->artisan('laraowl:teams:create', [
+    $this->artisan('tyto:teams:create', [
         'name' => 'Solo Team',
         'owner' => $owner->email,
         '--personal' => true,
@@ -38,7 +38,7 @@ test('a team can be marked personal', function () {
 });
 
 test('team creation fails for an unknown owner', function () {
-    $this->artisan('laraowl:teams:create', ['name' => 'Acme Inc', 'owner' => 'missing@example.com'])
+    $this->artisan('tyto:teams:create', ['name' => 'Acme Inc', 'owner' => 'missing@example.com'])
         ->assertExitCode(1);
 
     $this->assertDatabaseMissing('teams', ['name' => 'Acme Inc']);
@@ -47,7 +47,7 @@ test('team creation fails for an unknown owner', function () {
 test('team creation fails for a reserved name', function () {
     $owner = User::factory()->create();
 
-    $this->artisan('laraowl:teams:create', ['name' => 'Settings', 'owner' => $owner->email])
+    $this->artisan('tyto:teams:create', ['name' => 'Settings', 'owner' => $owner->email])
         ->assertExitCode(1);
 
     $this->assertDatabaseMissing('teams', ['name' => 'Settings']);

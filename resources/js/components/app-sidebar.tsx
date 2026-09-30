@@ -17,8 +17,11 @@ import {
     FileText,
     Settings,
     Globe,
+    HeartPulse,
     Shield,
     Lock as LockIcon,
+    ScanSearch,
+    Siren,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -33,11 +36,13 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
+import { useLocale } from '@/hooks/use-locale';
 import type { PageProps } from '@/types';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     const { props } = usePage<PageProps>();
+    const { t } = useLocale();
     const teamSlug = props.currentTeam?.slug || '';
 
     const projects = (props as any).projects || [];
@@ -78,52 +83,52 @@ export function AppSidebar() {
 
     const activityNavItems: NavItem[] = [
         {
-            title: 'Requests',
+            title: t('nav.requests'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/requests`),
             icon: Activity,
         },
         {
-            title: 'Jobs',
+            title: t('nav.jobs'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/jobs`),
             icon: Repeat,
         },
         {
-            title: 'Commands',
+            title: t('nav.commands'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/commands`),
             icon: Terminal,
         },
         {
-            title: 'Scheduled Tasks',
+            title: t('nav.scheduledTasks'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/scheduled-tasks`),
             icon: Calendar,
         },
         {
-            title: 'Exceptions',
+            title: t('nav.exceptions'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/exceptions`),
             icon: Zap,
         },
         {
-            title: 'Queries',
+            title: t('nav.queries'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/queries`),
             icon: Search,
         },
         {
-            title: 'Notifications',
+            title: t('nav.notifications'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/notifications`),
             icon: Bell,
         },
         {
-            title: 'Mail',
+            title: t('nav.mail'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/mail`),
             icon: Mail,
         },
         {
-            title: 'Cache',
+            title: t('nav.cache'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/cache`),
             icon: Database,
         },
         {
-            title: 'Outgoing Requests',
+            title: t('nav.outgoingRequests'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/outgoing-requests`),
             icon: ExternalLink,
         },
@@ -133,21 +138,31 @@ export function AppSidebar() {
 
     const monitoringNavItems: NavItem[] = [
         {
-            title: 'Users',
+            title: t('nav.alertDelivery'),
+            href: withPeriod(`/${teamSlug}/${projectSlug}/alerts`),
+            icon: Siren,
+        },
+        {
+            title: t('nav.users'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/users`),
             icon: Users,
         },
         ...(uptimeEnabled
             ? [
                   {
-                      title: 'Uptime',
+                      title: t('nav.uptime'),
                       href: withPeriod(`/${teamSlug}/${projectSlug}/uptime`),
                       icon: Globe,
                   },
               ]
             : []),
         {
-            title: 'Logs',
+            title: t('nav.heartbeats'),
+            href: withPeriod(`/${teamSlug}/${projectSlug}/heartbeats`),
+            icon: HeartPulse,
+        },
+        {
+            title: t('nav.logs'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/logs`),
             icon: FileText,
         },
@@ -155,12 +170,12 @@ export function AppSidebar() {
 
     const securityNavItems: NavItem[] = [
         {
-            title: 'Security',
+            title: t('nav.security'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/security`),
             icon: Shield,
         },
         {
-            title: 'Firewall',
+            title: t('nav.firewall'),
             href: withPeriod(`/${teamSlug}/${projectSlug}/firewall`),
             icon: LockIcon,
             items: [
@@ -194,15 +209,16 @@ export function AppSidebar() {
         <Sidebar
             collapsible="icon"
             variant="inset"
-            className="border-r border-sidebar-border bg-sidebar"
+            className="border-r border-white/[0.06] bg-sidebar"
         >
-            <SidebarHeader className="px-4 pt-4 pb-2">
+            <SidebarHeader className="relative overflow-hidden px-3 pt-5 pb-3">
+                <div className="pointer-events-none absolute -top-20 -left-16 size-52 rounded-full bg-primary/12 blur-3xl" />
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
                             asChild
-                            className="hover:bg-transparent"
+                            className="h-16 hover:bg-transparent"
                         >
                             <Link
                                 href={dashboardUrl}
@@ -215,51 +231,72 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
 
-                <div className="mt-4 px-2">
+                <div className="relative mt-4 px-1">
                     <WorkspaceSwitcher />
                 </div>
             </SidebarHeader>
 
-            <SidebarContent className="px-2 pt-4">
+            <SidebarContent className="custom-scrollbar px-2 pt-4">
                 <div className="space-y-4">
                     <NavMain
                         items={[
                             {
-                                title: 'Dashboard',
+                                title: t('nav.dashboard'),
                                 href: dashboardUrl,
                                 icon: LayoutGrid,
                             },
                             {
-                                title: 'Issues',
+                                title: t('nav.issues'),
                                 href: withPeriod(
                                     `/${teamSlug}/${projectSlug}/issues`,
                                 ),
                                 icon: AlertCircle,
                             },
+                            {
+                                title: t('nav.telemetry'),
+                                href: withPeriod(
+                                    `/${teamSlug}/${projectSlug}/telemetry`,
+                                ),
+                                icon: ScanSearch,
+                            },
                         ]}
-                        label="Platform"
+                        label={t('nav.platform')}
                     />
 
-                    <NavMain items={activityNavItems} label="Activity" />
+                    <NavMain
+                        items={activityNavItems}
+                        label={t('nav.activity')}
+                    />
 
-                    <NavMain items={securityNavItems} label="Security" />
+                    <NavMain
+                        items={securityNavItems}
+                        label={t('nav.security')}
+                    />
 
-                    <NavMain items={monitoringNavItems} label="Monitoring" />
+                    <NavMain
+                        items={monitoringNavItems}
+                        label={t('nav.monitoring')}
+                    />
 
                     <NavMain
                         items={[
                             {
-                                title: 'Project Settings',
+                                title: t('nav.projectSettings'),
                                 href: `/${teamSlug}/${projectSlug}/settings`,
                                 icon: Settings,
                             },
+                            {
+                                title: t('nav.statusPage'),
+                                href: `/${teamSlug}/${projectSlug}/status-page`,
+                                icon: Globe,
+                            },
                         ]}
-                        label="Settings"
+                        label={t('nav.settings')}
                     />
                 </div>
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-sidebar-border p-4">
+            <SidebarFooter className="border-t border-sidebar-border bg-black/10 p-3">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

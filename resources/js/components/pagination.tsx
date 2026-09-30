@@ -23,7 +23,7 @@ export function Pagination({ meta }: { links?: any; meta: any }) {
 
     const arrow = (url: string | null, icon: React.ReactNode, key: string) => {
         const className =
-            'rounded p-1.5 transition-colors hover:bg-white/10 flex items-center justify-center';
+            'flex size-9 items-center justify-center rounded-xl border border-transparent text-muted-foreground transition-all hover:border-primary/20 hover:bg-primary/10 hover:text-primary';
 
         if (!url) {
             return (
@@ -51,8 +51,8 @@ export function Pagination({ meta }: { links?: any; meta: any }) {
     };
 
     return (
-        <div className="flex items-center justify-between gap-4 border-t border-border bg-white/[0.01] p-4">
-            <div className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border/70 bg-background/20 p-4 sm:flex-row">
+            <div className="text-xs font-medium text-muted-foreground">
                 Showing {meta.from} to {meta.to} of {meta.total} results
             </div>
 
@@ -68,14 +68,14 @@ export function Pagination({ meta }: { links?: any; meta: any }) {
                     'prev',
                 )}
 
-                <div className="mx-2 flex items-center gap-1">
+                <div className="mx-1 flex items-center gap-1">
                     {numberedLinks.map((link: any) => (
                         <Link
                             key={link.label}
                             href={link.url}
                             preserveScroll
                             preserveState
-                            className={`flex h-7 min-w-[28px] items-center justify-center rounded text-xs font-bold transition-all ${link.active ? 'border border-border bg-white/10 text-foreground' : 'text-gray-500 hover:bg-muted hover:text-foreground'}`}
+                            className={`flex size-9 items-center justify-center rounded-xl text-xs font-bold transition-all ${link.active ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'}`}
                         >
                             {link.label}
                         </Link>

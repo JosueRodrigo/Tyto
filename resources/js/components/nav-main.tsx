@@ -19,9 +19,9 @@ export function NavMain({
     const { isCurrentUrl } = useCurrentUrl();
 
     return (
-        <SidebarGroup className="px-2 py-0">
+        <SidebarGroup className="px-1 py-0">
             {label && (
-                <SidebarGroupLabel className="hidden text-[9px] font-bold tracking-widest text-foreground/20 uppercase group-data-[collapsible=icon]:hidden">
+                <SidebarGroupLabel className="hidden px-2 text-[9px] font-extrabold tracking-[0.16em] text-sidebar-foreground/30 uppercase group-data-[collapsible=icon]:hidden">
                     {label}
                 </SidebarGroupLabel>
             )}
@@ -32,10 +32,10 @@ export function NavMain({
                             asChild
                             isActive={isCurrentUrl(item.href)}
                             tooltip={{ children: item.title }}
-                            className={`group/menu-item transition-all duration-200 ${
+                            className={`group/menu-item relative h-10 rounded-xl transition-all duration-200 ${
                                 isCurrentUrl(item.href)
-                                    ? 'bg-white/10 font-bold text-foreground shadow-[0_0_15px_rgba(255,255,255,0.05)]'
-                                    : 'text-foreground/50 hover:bg-muted hover:text-foreground'
+                                    ? 'bg-sidebar-primary/12 font-bold text-sidebar-accent-foreground ring-1 ring-sidebar-primary/15'
+                                    : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'
                             } `}
                         >
                             <Link
@@ -45,10 +45,10 @@ export function NavMain({
                             >
                                 {item.icon && (
                                     <item.icon
-                                        className={`size-4 transition-transform duration-200 group-hover/menu-item:scale-110 ${isCurrentUrl(item.href) ? 'text-foreground' : 'text-foreground/40'}`}
+                                        className={`size-4 transition-colors ${isCurrentUrl(item.href) ? 'text-sidebar-primary drop-shadow-[0_0_8px_rgba(159,85,255,0.45)]' : 'text-sidebar-foreground/30 group-hover/menu-item:text-sidebar-foreground/70'}`}
                                     />
                                 )}
-                                <span className="tracking-tight">
+                                <span className="text-[13px] tracking-tight">
                                     {item.title}
                                 </span>
                             </Link>

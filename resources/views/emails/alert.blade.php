@@ -119,7 +119,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{ config('app.url') }}/logo.png" alt="Laraowl" style="height: 32px;">
+            <strong style="font-size: 22px; color: #9f55ff; letter-spacing: -0.03em;">TYTO</strong>
         </div>
         <div class="content">
             <div class="badge badge-error">Alert Notification</div>
@@ -150,8 +150,8 @@
             </div>
         </div>
         <div class="footer">
-            &copy; {{ date('Y') }} Laraowl. All rights reserved. <br>
-            Sent via Laraowl Smart Monitoring.
+            &copy; {{ date('Y') }} Tyto. All rights reserved. <br>
+            Sent via Tyto Monitoring.
         </div>
     </div>
 </body>
