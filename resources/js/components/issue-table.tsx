@@ -15,6 +15,14 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -58,6 +66,9 @@ export function IssueTable({
     const data = issues.data || [];
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [bulkProcessing, setBulkProcessing] = useState(false);
+    const [pendingBulkStatus, setPendingBulkStatus] = useState<
+        'resolved' | 'ignored' | null
+    >(null);
     const supportsBulkActions = baseUrl === 'issues';
     const pageIds = data.map((issue: any) => Number(issue.id));
     const allPageSelected =
@@ -96,23 +107,31 @@ export function IssueTable({
         );
     };
 
-    const bulkUpdate = (status: 'resolved' | 'ignored') => {
-        if (selectedIds.length === 0) return;
-
-        const action = status === 'resolved' ? 'resolve' : 'ignore';
-        if (!window.confirm(`Are you sure you want to ${action} ${selectedIds.length} selected issue(s)?`)) {
-            return;
+    const requestBulkUpdate = (status: 'resolved' | 'ignored') => {
+        if (selectedIds.length > 0) {
+            setPendingBulkStatus(status);
         }
+    };
+
+    const confirmBulkUpdate = () => {
+        if (!pendingBulkStatus || selectedIds.length === 0) return;
 
         setBulkProcessing(true);
-        router.patch(`/${teamSlug}/${projectSlug}/issues/bulk`, {
-            issue_ids: selectedIds,
-            status,
-        }, {
-            preserveScroll: true,
-            onSuccess: () => setSelectedIds([]),
-            onFinish: () => setBulkProcessing(false),
-        });
+        router.patch(
+            `/${teamSlug}/${projectSlug}/issues/bulk`,
+            {
+                issue_ids: selectedIds,
+                status: pendingBulkStatus,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedIds([]);
+                    setPendingBulkStatus(null);
+                },
+                onFinish: () => setBulkProcessing(false),
+            },
+        );
     };
 
     if (data.length === 0) {
@@ -136,10 +155,10 @@ export function IssueTable({
                         </Button>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => bulkUpdate('ignored')} disabled={bulkProcessing}>
+                        <Button variant="outline" size="sm" onClick={() => requestBulkUpdate('ignored')} disabled={bulkProcessing}>
                             Ignore selected
                         </Button>
-                        <Button size="sm" onClick={() => bulkUpdate('resolved')} disabled={bulkProcessing}>
+                        <Button size="sm" onClick={() => requestBulkUpdate('resolved')} disabled={bulkProcessing}>
                             <CheckCircle2 className="size-4" /> Resolve selected
                         </Button>
                     </div>
@@ -208,6 +227,65 @@ export function IssueTable({
             </Table>
             </div>
             <Pagination links={issues.links} meta={issues} />
+
+            <Dialog
+                open={pendingBulkStatus !== null}
+                onOpenChange={(open) => {
+                    if (!open && !bulkProcessing) {
+                        setPendingBulkStatus(null);
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader className="gap-3 pr-8">
+                        <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                            <CheckCircle2 className="size-5" />
+                        </div>
+                        <DialogTitle>
+                            {pendingBulkStatus === 'resolved'
+                                ? 'Resolve selected issues?'
+                                : 'Ignore selected issues?'}
+                        </DialogTitle>
+                        <DialogDescription className="leading-6">
+                            You are about to update {selectedIds.length}{' '}
+                            {selectedIds.length === 1 ? 'issue' : 'issues'}. This
+                            keeps the incident history intact and updates their
+                            triage status.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="rounded-2xl border border-border/70 bg-muted/40 px-4 py-3">
+                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                            New status
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                            {pendingBulkStatus === 'resolved'
+                                ? 'Resolved'
+                                : 'Ignored'}
+                        </p>
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPendingBulkStatus(null)}
+                            disabled={bulkProcessing}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={confirmBulkUpdate}
+                            disabled={bulkProcessing}
+                        >
+                            {bulkProcessing
+                                ? 'Updating...'
+                                : pendingBulkStatus === 'resolved'
+                                  ? 'Resolve issues'
+                                  : 'Ignore issues'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
