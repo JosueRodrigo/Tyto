@@ -82,7 +82,6 @@ test('an incident cannot be assigned to a user outside its team', function () {
     expect($issue->fresh()->assigned_to)->toBeNull();
 });
 
-
 test('issues can be resolved in bulk only inside the current project', function () {
     $team = Team::factory()->create();
     $user = User::factory()->create();
