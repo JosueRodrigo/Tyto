@@ -10,6 +10,7 @@ use App\Models\Record;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
@@ -71,7 +72,7 @@ class InvestigateProject extends Tool
             )
             ->where(function (Builder $builder) use ($query) {
                 $builder->where('message', 'like', '%'.$query.'%')
-                    ->orWhereRaw('CAST(payload AS CHAR) LIKE ?', ['%'.$query.'%']);
+                    ->orWhereRaw($this->payloadSearchExpression().' LIKE ?', ['%'.$query.'%']);
             })
             ->orderByDesc('created_at');
 
