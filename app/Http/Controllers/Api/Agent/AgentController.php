@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Agent;
 
 use App\Http\Controllers\Controller;
-use App\Mcp\Support\PayloadSanitizer;
 use App\Models\Issue;
 use App\Models\Project;
 use App\Models\User;
